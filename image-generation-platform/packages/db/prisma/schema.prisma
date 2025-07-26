@@ -21,7 +21,7 @@ model Model{
  name String
   age Int
   type TypeEnum
-  ethinicity EthenecityEnum
+  ethinicity EthinicityEnum
  bald Boolean
  eyeColor EyeColorEnum
  trainingImages TrainingImages[]
@@ -61,14 +61,14 @@ enum TypeEnum{
   Woman
   Other
 }
-enum EthenecityEnum{
+enum EthinicityEnum{
   White 
   Black
-  AsianAmerican
-     EastAsian
-     SouthEastAsian
-  SouthAsian
-     MiddleEastern
+  Asian_American                    @map("Asian American")
+     East_Asian                     @map("East Asian")
+     South_East_Asian               @map("South East Asian")
+  South_Asian                       @map("South Asian")
+     Middle_Eastern                 @map("Middle Eastern")
      Pacific 
      Hispanic
 }
