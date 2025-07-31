@@ -20,6 +20,7 @@ model Model{
   id String @id @default(uuid())
  name String
   age Int
+  userId String
   type TypeEnum
   ethinicity EthinicityEnum
  bald Boolean
@@ -38,9 +39,11 @@ model TrainingImages{
 }
 model OutputImages{
   id String @id @default(uuid())
-  imageUrl String
+  imageUrl String @default("")
   modelId String
   userId String
+  prompt String
+  status OutputImagesStatusEnum @default(Pending)
   model Model @relation(fields:[modelId],references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -77,4 +80,9 @@ enum EyeColorEnum{
   Blue
   Hazel
   Gray
+}
+enum OutputImagesStatusEnum{
+  Pending 
+  generated
+  Failed
 }
