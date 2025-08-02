@@ -14,7 +14,7 @@ images:z.array(z.string())
 
 })
 export const GenerateImage=z.object({
-    propmt:z.string(),
+  prompt:z.string(),
     modelId:z.string(),
     num:z.number()
 })

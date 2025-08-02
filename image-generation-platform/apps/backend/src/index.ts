@@ -8,7 +8,7 @@ app.use(express.json())
 const USER_ID='1123'
 app.post('/ai/training',async(res:any,req:any)=>{
     const parsedBody=TrainModel.safeParse(req.body)
-    if(!parsedBody){
+    if(!parsedBody.success){
         return res.status(411)
     }
 const data=await prisma.model.create({
@@ -30,9 +30,9 @@ const data=await prisma.model.create({
 
 app.post('/ai/generate', async(req,res)=>{
  const parsedBody=GenerateImage.safeParse(req.body)
- if(!parsedBody){{
+ if(!parsedBody.success){
  return res.status(411)
- }}
+ }
  const data=await prisma.OutputImages.create({
     data:{
         prompt:parsedBody.data.prompt,
@@ -46,9 +46,8 @@ imageUrl:""
 
 app.post('/pack/generate',async(req,res)=>{
     const parsedBody=GenerateImagesFromPack.safeParse(req.body)
-    if(!parsedBody){
-        return res.status(411)
-    }
+    if(!parsedBody.success){return res.status(411).json({message:"Input incorrect"})}
+    
 
 
    })
