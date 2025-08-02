@@ -47,16 +47,31 @@ imageUrl:""
 app.post('/pack/generate',async(req,res)=>{
     const parsedBody=GenerateImagesFromPack.safeParse(req.body)
     if(!parsedBody.success){return res.status(411).json({message:"Input incorrect"})}
-    
+    const prompts=await prisma.packPrompts.findMany({
+        where:{
+            packId:parsedBody.data.packId
+        }
+    })
+const images=await prisma.OutputImages.createManyAndReturn({
+    data:prompts.map((prompp:any)=>({
+prompt:prompp.prompt,
+userId:USER_ID,
+modelId:parsedBody.data.modelId,
+imageUrl:""
 
+    }))
+})
+res.json({
+    images:images.map((image:any)=>image.id)
+})
 
    })
 
 
 
-app.get('/pack/bulk',(req,res)=>{})
+app.get('/pack/bulk',async(req,res)=>{})
 
-app.get('/image',(req,res)=>{})
+app.get('/image',async(req,res)=>{})
 
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`)
