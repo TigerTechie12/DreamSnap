@@ -90,6 +90,12 @@ app.get('/image/bulk',async(req,res)=>{
         images:imagesData
     })
 })
+app.post('/fal-ai/webhook',async(req,res)=>{
+    console.log(req.body)
+    res.json({
+        message:'webhook received'
+    })
+})
 
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`)

@@ -23,6 +23,7 @@
     "packages/*"
   ],
   "dependencies": {
+    "@fal-ai/client": "^1.6.1",
     "@prisma/client": "^6.12.0",
     "zod": "^4.0.5"
   }
