@@ -74,7 +74,22 @@ app.get('/pack/bulk',async(req,res)=>{
 res.json({packs})
 })
 
-app.get('/image',async(req,res)=>{})
+app.get('/image/bulk',async(req,res)=>{
+    const ids=req.query.ids as string[]
+    const limits=req.query.limits as string ?? "10"
+    const offset=req.query.offset as string ?? "0"
+    const imagesData=await prisma.outputImages.findMany({
+        where:{
+            id:{in:ids},
+            userId:USER_ID
+        },
+        skip:parseInt(offset),
+        take:parseInt(limits)
+    })
+    res.json({
+        images:imagesData
+    })
+})
 
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`)
