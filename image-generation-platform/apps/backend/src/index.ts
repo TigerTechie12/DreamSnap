@@ -69,7 +69,10 @@ res.json({
 
 
 
-app.get('/pack/bulk',async(req,res)=>{})
+app.get('/pack/bulk',async(req,res)=>{
+ const packs=await prisma.findMany({})
+res.json({packs})
+})
 
 app.get('/image',async(req,res)=>{})
 
