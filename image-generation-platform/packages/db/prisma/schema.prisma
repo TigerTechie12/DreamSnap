@@ -23,6 +23,9 @@ model Model{
   userId String
   type TypeEnum
   ethinicity EthinicityEnum
+  triggerWord String?
+  tensorPath String?
+  trainingStatus ModelTrainingStatusEnum @default(Pending)
  bald Boolean
  eyeColor EyeColorEnum
  trainingImages TrainingImages[]
@@ -30,6 +33,7 @@ model Model{
  createdAt DateTime @default(now())
  updatedAt DateTime @updatedAt
 }
+
 
 model TrainingImages{
   id String @id @default(uuid())
@@ -83,6 +87,11 @@ enum EyeColorEnum{
 }
 enum OutputImagesStatusEnum{
   Pending 
+  generated
+  Failed
+}
+enum ModelTrainingStatusEnum{
+  Pending
   generated
   Failed
 }
