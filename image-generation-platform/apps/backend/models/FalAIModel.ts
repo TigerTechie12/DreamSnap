@@ -7,7 +7,7 @@ export class FalAIModel extends BaseModel{
     }
 
 
-private async generateImage(prompt:string,tensorPath:string){
+public async generateImage(prompt:string,tensorPath:string){
     const {request_id}=await fal.queue.submit('fal-ai/flux-lora',{
   input: {
     prompt: prompt,
@@ -19,7 +19,7 @@ private async generateImage(prompt:string,tensorPath:string){
 return request_id
 
 }
-private async trainModel(zipUrl:string,triggerWord:string){
+public async trainModel(zipUrl:string,triggerWord:string){
     const {request_id}=await fal.queue.submit("fal-ai/flux-lora-fast-training",
         {
             input:{
