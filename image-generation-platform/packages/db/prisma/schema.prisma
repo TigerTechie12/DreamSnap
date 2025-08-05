@@ -28,20 +28,16 @@ model Model{
   trainingStatus ModelTrainingStatusEnum @default(Pending)
  bald Boolean
  eyeColor EyeColorEnum
- trainingImages TrainingImages[]
+
  outputImages OutputImages[]
  falAiRequestId String?
  createdAt DateTime @default(now())
  updatedAt DateTime @updatedAt
+ zipUrl String
 }
 
 
-model TrainingImages{
-  id String @id @default(uuid())
-  imageUrl String
-  modelId String
-  model Model @relation(fields:[modelId], references: [id])
-}
+
 model OutputImages{
   id String @id @default(uuid())
   imageUrl String @default("")

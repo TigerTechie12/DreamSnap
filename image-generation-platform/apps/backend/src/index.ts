@@ -25,6 +25,7 @@ const data=await prisma.model.create({
            ethinicity: parsedBody.data.ethinicity,
             bald:parsedBody.data.bald,
             userId:USER_ID,
+            zipUrl:parsedBody.data.zipUrl,
             falAiRequestId:request_id
         }
     })
