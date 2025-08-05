@@ -11,6 +11,7 @@ app.post('/ai/training',async(res:any,req:any)=>{
     if(!parsedBody.success){
         return res.status(411)
     }
+    const images=req.body.images
 const data=await prisma.model.create({
         data:{
             name:parsedBody.data.name,
@@ -92,6 +93,14 @@ app.get('/image/bulk',async(req,res)=>{
 })
 app.post('/fal-ai/webhook/train',async(req,res)=>{
     console.log(req.body)
+    const request_id=req.body.request_id
+    await prisma.model.update({
+        where:{falAiRequestId:request_id
+    },
+    data:{
+        trainingStaus:"Generated",
+        tensorPath:req.body.request_id
+    }})
     res.json({
         message:'webhook received'
     })
@@ -99,6 +108,17 @@ app.post('/fal-ai/webhook/train',async(req,res)=>{
 
 app.post('/fal-ai/webhook/image',async(req,res)=>{
     console.log(req.body)
+    const requestId=req.body.request_id
+    const imageId=req.body.image_id
+    await prisma.outputImages.update({
+        where:{
+           falAiRequestId:requestId
+        },
+        data:{
+            status:"Generated",
+            imageUrl:req.body.image_url
+        }
+    })
     res.json({
         message:'webhook received'
     })
