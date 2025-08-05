@@ -13,7 +13,7 @@ private async generateImage(prompt:string,tensorPath:string){
     prompt: prompt,
     loras:[{path:tensorPath,scale:1}]
   },
-  
+  webhookUrl:`${process.env.WEBHOOK_URL}/fal-ai/webhook/image`,
   
 });
 return request_id
@@ -26,7 +26,7 @@ private async trainModel(zipUrl:string,triggerWord:string){
                 images_data_url:zipUrl,
                 trigger_word:triggerWord
             },
-            webhookUrl:`${process.env.WEBOOK_URL}/fal-ai/webhook`,
+           webhookUrl:`${process.env.WEBHOOK_URL}/fal-ai/webhook/train`,
         })
         return request_id
 }
