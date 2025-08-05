@@ -23,7 +23,8 @@ private async trainModel(zipUrl:string,triggerWord:string){
     const {request_id}=await fal.queue.submit("fal-ai/flux-lora-fast-training",
         {
             input:{
-                images_data_url:zipUrl
+                images_data_url:zipUrl,
+                trigger_word:triggerWord
             },
             webhookUrl:`${process.env.WEBOOK_URL}/fal-ai/webhook`,
         })
