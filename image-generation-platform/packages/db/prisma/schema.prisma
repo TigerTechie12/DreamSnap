@@ -30,6 +30,7 @@ model Model{
  eyeColor EyeColorEnum
  trainingImages TrainingImages[]
  outputImages OutputImages[]
+ falAiRequestId String?
  createdAt DateTime @default(now())
  updatedAt DateTime @updatedAt
 }
@@ -46,6 +47,7 @@ model OutputImages{
   imageUrl String @default("")
   modelId String
   userId String
+   falAiRequestId String?
   prompt String
   status OutputImagesStatusEnum @default(Pending)
   model Model @relation(fields:[modelId],references: [id])
