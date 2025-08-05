@@ -10,7 +10,7 @@ ethinicity:z.enum(["White","Black",
 ]),
 eyeColor:z.enum(["Brown","Blue","Hazel","Gray"]),
 bald:z.boolean(),
-images:z.array(z.string())
+zipUrl:z.string()
 
 })
 export const GenerateImage=z.object({
