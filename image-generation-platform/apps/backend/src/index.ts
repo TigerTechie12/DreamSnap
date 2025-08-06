@@ -1,21 +1,39 @@
 import express from 'express'
 import { TrainModel, GenerateImage, GenerateImagesFromPack } from '@shreyash_iitr/common';
 import { prisma } from 'db';
-import { S3Client } from "@aws-sdk/client-s3"
-import {FalAIModel} from '../models/FalAIModel'
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3"
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner"
+import {FalAIModel} from './models/FalAIModel'
 const PORT=process.env.PORT || 3000
 
 const app=express()
 app.use(express.json())
 const USER_ID='1123'
 const FalAiModel=new FalAIModel()
+const s3Client = new S3Client({ region: process.env.AWS_REGION || 'us-east-1' });
+
+app.get("/pre-signed-url", async (req, res) => {
+    try {
+        const objectKey = `models/${Date.now()}_${Math.random().toString().substring(2, 8)}.zip`;
+        const command = new PutObjectCommand({
+            Bucket: process.env.BUCKET_NAME,
+            Key: objectKey,
+            ContentType: 'application/zip',
+        });
+        const url = await getSignedUrl(s3Client, command, { expiresIn: 60 * 5 });
+        res.json({ url });
+    } catch (error: any) {
+        console.error('Error generating pre-signed URL:', error);
+        res.status(500).json({ error: 'Failed to generate pre-signed URL', details: error.message });
+    }
+})
 app.post('/ai/training',async(res:any,req:any)=>{
     const parsedBody=TrainModel.safeParse(req.body)
     if(!parsedBody.success){
         return res.status(411)
     }
     const images=req.body.images
-    const request_id=await FalAiModel.trainModel("",parsedBody.data.name)
+    const request_id=await FalAiModel.trainModel(parsedBody.data.zipUrl,parsedBody.data.name)
 const data=await prisma.model.create({
         data:{
             name:parsedBody.data.name,
