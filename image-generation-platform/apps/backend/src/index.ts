@@ -87,12 +87,14 @@ app.post('/pack/generate',async(req,res)=>{
             packId:parsedBody.data.packId
         }
     })
+    let requestIds:{request_id:string}[]=await Promise.all(prompts.map((prompt:any)=>FalAiModel.generateImage(prompt.prompt,parsedBody.data.modelId)))
 const images=await prisma.OutputImages.createManyAndReturn({
     data:prompts.map((prompp:any)=>({
 prompt:prompp.prompt,
 userId:USER_ID,
 modelId:parsedBody.data.modelId,
-imageUrl:""
+imageUrl:"",
+falAiRequestId:requestIds
 
     }))
 })
