@@ -7,6 +7,7 @@ app.post('/ai/generate',(req,res)=>{})
 app.post('/ai/pack/generate',(req,res)=>{})
 app.get('/pack/bulk',(req,res)=>{})
 app.get('/image',(req,res)=>{})
+
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`)
 })
