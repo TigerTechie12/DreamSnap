@@ -17,6 +17,8 @@ model User{
   id String @id @default(uuid())
   username String
   profilePicture String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum ModelTypeEnum{
@@ -49,25 +51,34 @@ age Int
 bald Boolean
 ethinicity EthinictyEnum
 eyecolor EyeColorEnum
-
+trainingImages TrainingImages[]
+outputImages OutputImages[]
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
 }
 model TrainingImages{
   id String @id @default(uuid())
   imagesUrl String
   modelId String
+  model Model @relation(fields:[modelId],references:[id])
 }
 model OutputImages{
   id String @id @default(uuid())
   imageUrl String
   modelId String
+model Model @relation(fields:[modelId],references: [id])
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
 
 }
 model Packs{
   id String @id @default(uuid())
   name String
+ prompts PackPrompts[]
 }
 model PackPrompts{
   id String @id @default(uuid())
   prompt String
   packId String
+  packs Packs @relation(fields:[packId], references: [id])
 }
