@@ -1,19 +1,11 @@
 {
-  "name": "common",
+  "name": "dreamsnap-common",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./types": {
-      "types": "./dist/types.d.ts",
-      "default": "./dist/types.js"
-    }
-  },
+  "main": "dist/types.js",
+  "types": "dist/types.d.ts", 
+  
+ 
   "files": [
     "dist"
   ],

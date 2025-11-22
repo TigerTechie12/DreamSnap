@@ -1,6 +1,7 @@
 import express from 'express'
 const PORT =process.env.PORT || 8080
 const app=express()
+import { TrainModel,GenerateImage,GenerateImagesFromPack } from 'common'
 
 app.post('/ai/training',(req,res)=>{})
 app.post('/ai/generate',(req,res)=>{})
