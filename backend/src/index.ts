@@ -2,7 +2,7 @@ import express from 'express'
 const PORT =process.env.PORT || 8080
 const app=express()
 import { TrainModel,GenerateImage,GenerateImagesFromPack } from 'common'
-
+import {prismaClient} from "db"
 app.post('/ai/training',(req,res)=>{})
 app.post('/ai/generate',(req,res)=>{})
 app.post('/ai/pack/generate',(req,res)=>{})

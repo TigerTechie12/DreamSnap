@@ -12,7 +12,8 @@
   "type": "module",
   "dependencies": {
     "dotenv": "^17.2.3",
-    "common":"file:C:/Users/Shreyash Srivastava/Documents/DreamSnap/packages/common"
+    "common":"file:C:/Users/Shreyash Srivastava/Documents/DreamSnap/packages/common",
+    "db":"file:C:/Users/Shreyash Srivastava/Documents/DreamSnap/packages/db"
   },
   "devDependencies": {
     "@types/express": "^5.0.5",

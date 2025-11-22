@@ -1,9 +1,1 @@
-{
-  "devDependencies": {
-    "prisma": "^6.19.0"
-  },
-  "dependencies": {
-    "@prisma/client": "^7.0.0",
-    "dotenv": "^17.2.3"
-  }
-}
+{"name":"db","module":"index.ts","type":"module","exports":{".":"./index.ts"},"devDependencies":{"prisma":"^6.0.0"},"dependencies":{"@prisma/client":"^6.0.0","dotenv":"^17.2.3"}}
