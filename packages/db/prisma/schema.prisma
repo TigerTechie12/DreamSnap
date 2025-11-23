@@ -32,9 +32,8 @@ enum EthinictyEnum{
   AsianAmerican
   EastAsian
   SouthEastAsian
-  SouthAsianMiddle
-   Eastern
-   Pacific
+  SouthAsianMiddleEastern
+  Pacific
   Hispanic
 }
 enum EyeColorEnum{
@@ -46,7 +45,7 @@ enum EyeColorEnum{
 model Model{
 id String @id @default(uuid())
 name String
-type ModelTypeEnum
+gender ModelTypeEnum
 age Int
 bald Boolean
 ethinicity EthinictyEnum
