@@ -12,7 +12,7 @@ if(!parsedResult.success){
 return res.status(400).json({message:"Invalid input"})
 
 }
-await prismaClient.model.create({
+const dbData=await prismaClient.model.create({
     data:{
         name:parsedResult.data.name,
         age:parsedResult.data.age,
@@ -24,7 +24,7 @@ await prismaClient.model.create({
     }
 
 })
-return res.status(200).json({message:"Model training data saved"})})
+return res.status(200).json({modelId:dbData.id})})
 
 
 
