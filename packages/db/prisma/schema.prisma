@@ -58,6 +58,11 @@ createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
 user User @relation(fields:[userId], references:[id])
 }
+enum OutputImageStatusEnum{
+  PENDING
+  COMPLETED
+  FAILED
+}
 model TrainingImages{
   id String @id @default(uuid())
   imagesUrl String
@@ -71,7 +76,8 @@ model OutputImages{
 model Model @relation(fields:[modelId],references: [id])
 createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
-
+prompt String
+status OutputImageStatusEnum @default(PENDING)
 }
 model Packs{
   id String @id @default(uuid())
