@@ -55,8 +55,15 @@ eyecolor EyeColorEnum
 trainingImages TrainingImages[]
 outputImages OutputImages[]
 createdAt DateTime @default(now())
+  jobId String
 updatedAt DateTime @updatedAt
+status ModelTrainingEnum @default(TRAINING)
 user User @relation(fields:[userId], references:[id])
+}
+enum ModelTrainingEnum{
+  TRAINING
+  COMPLETED
+  FAILED
 }
 enum OutputImageStatusEnum{
   PENDING
