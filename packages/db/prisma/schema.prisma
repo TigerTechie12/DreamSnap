@@ -54,8 +54,9 @@ userId String
 eyecolor EyeColorEnum
 trainingImages TrainingImages[]
 outputImages OutputImages[]
+imageUrl String
 createdAt DateTime @default(now())
-  jobId String
+  jobId String?
 updatedAt DateTime @updatedAt
 status ModelTrainingEnum @default(TRAINING)
 user User @relation(fields:[userId], references:[id])
@@ -81,6 +82,7 @@ model OutputImages{
   imageUrl String
   modelId String
 model Model @relation(fields:[modelId],references: [id])
+jobid String
 createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
 prompt String

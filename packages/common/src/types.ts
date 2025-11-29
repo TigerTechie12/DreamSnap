@@ -9,7 +9,8 @@ gender:z.enum(["Man","Woman","Others"]),
 ethinicity:z.enum(["White","Black","AsianAmerican","EastAsian","SouthEastAsian","SouthAsianMiddleEastern","Pacific","Hispanic"]),
 eye_color:z.enum(["Brown","Blue","Hazel","Gray"]),
 bald:z.boolean(),
-images:z.array(z.string())
+images:z.array(z.string()),
+imageUrl:z.string()
 
 })
 export const GenerateImage=z.object({

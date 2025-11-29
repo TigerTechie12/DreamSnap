@@ -1,4 +1,5 @@
 import express from 'express'
+import { fal } from '@fal-ai/client'
 
 import { TrainModel,GenerateImage,GenerateImagesFromPack } from 'common'
 import {prismaClient} from "db"
@@ -7,12 +8,22 @@ const app=express()
 app.use(express.json())
 app.post('/ai/training',async(req,res)=>{
 const input=req.body
+
+
 const userId="test-user-id"
 const parsedResult=TrainModel.safeParse(input)
 if(!parsedResult.success){
 return res.status(400).json({message:"Invalid input"})
 
 }
+
+const { request_id } = await fal.queue.submit("fal-ai/flux-lora-fast-training", {
+  input: {
+    images_data_url: parsedResult.data.imageUrl,
+    
+  },
+  webhookUrl: "https://optional.webhook.url/for/results",
+})
 const dbData=await prismaClient.model.create({
     data:{
         name:parsedResult.data.name,
@@ -21,12 +32,23 @@ const dbData=await prismaClient.model.create({
         ethinicity:parsedResult.data.ethinicity,
         eyecolor:parsedResult.data.eye_color,
         bald:parsedResult.data.bald,
-        userId:userId
+        userId:userId,
+        imageUrl:parsedResult.data.imageUrl,
+        jobId:request_id     
     }
 
 })
-return res.status(200).json({modelId:dbData.id})})
 
+
+return res.status(200).json({modelId:dbData.id,msg:"Training started"})
+
+})
+app.post('/ai/webhook',async(req,res)=>{
+const {result}=req.body
+const dbData=await prismaClient.trainingImages.create({
+imagesUrl:result.images_data_url,
+
+})})
 
 
 app.post('/ai/generate',async(req,res)=>{
