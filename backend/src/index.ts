@@ -51,6 +51,7 @@ const dbData=await prismaClient.model.update({
     },
     data:{
 trainingImagesUrl :result.images_data_url,
+status:"COMPLETED"
     }
 })})
 
