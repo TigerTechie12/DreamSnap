@@ -52,7 +52,7 @@ bald Boolean
 ethinicity EthinictyEnum
 userId String
 eyecolor EyeColorEnum
-trainingImages TrainingImages[]
+trainingImagesUrl String?
 outputImages OutputImages[]
 imageUrl String
 createdAt DateTime @default(now())
@@ -70,12 +70,6 @@ enum OutputImageStatusEnum{
   PENDING
   COMPLETED
   FAILED
-}
-model TrainingImages{
-  id String @id @default(uuid())
-  imagesUrl String
-  modelId String
-  model Model @relation(fields:[modelId],references:[id])
 }
 model OutputImages{
   id String @id @default(uuid())
