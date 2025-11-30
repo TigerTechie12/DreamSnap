@@ -84,7 +84,14 @@ const dbModel=await prismaClient.model.findUnique({
 if(!dbModel || dbModel.status!=="COMPLETED"){
 return res.status(400).json({message:"Model not found or not trained yet"})
 }
-
+const path:any= dbModel.trainingImagesUrl
+const { request_id } = await fal.queue.submit('fal-ai/flux-lora', {
+  input: {
+    prompt: parsedResult.data.prompt,
+ loras: [{ path:path, scale: 1.0 }]
+  },
+  webhookUrl: "https://optional.webhook.url/for/results",
+})
 
 
 
@@ -92,11 +99,11 @@ const dbData=await prismaClient.outputImages.create({
     data:{
             prompt:parsedResult.data.prompt,
             modelId:parsedResult.data.modelId,
-            imageUrl:"",
-
+            jobid:request_id
+            
     }
 })
-return res.status(200).json({ImageId:dbData.id})
+return res.status(200).json({ImageId:dbData.id, message:"Generation started"})
 })
 app.post('/ai/pack/generate',async(req,res)=>{
     const packBody=req.body
