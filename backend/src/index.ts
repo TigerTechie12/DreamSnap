@@ -45,6 +45,19 @@ return res.status(200).json({modelId:dbData.id,msg:"Training started"})
 })
 app.post('/ai/webhook',async(req,res)=>{
 const {result}=req.body
+if(!result){
+
+    const dbData=await prismaClient.model.update({
+    where:{
+        id:result.request_id
+    },
+    data:{
+trainingImagesUrl :result.images_data_url,
+status:"FAILED"
+
+}
+})
+}
 const dbData=await prismaClient.model.update({
     where:{
         id:result.request_id
