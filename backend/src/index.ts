@@ -1,6 +1,5 @@
 import express from 'express'
 import { fal } from '@fal-ai/client'
-
 import { TrainModel,GenerateImage,GenerateImagesFromPack } from 'common'
 import {prismaClient} from "db"
 const PORT =process.env.PORT || 8080
@@ -75,6 +74,20 @@ app.post('/ai/generate',async(req,res)=>{
     if(!parsedResult.success){
         return res.status(400).json({message:"Invalid input"})
     }
+const dbModel=await prismaClient.model.findUnique({
+    where:{id:parsedResult.data.modelId},
+    select:{status:true,
+        trainingImagesUrl:true
+    }
+
+})
+if(!dbModel || dbModel.status!=="COMPLETED"){
+return res.status(400).json({message:"Model not found or not trained yet"})
+}
+
+
+
+
 const dbData=await prismaClient.outputImages.create({
     data:{
             prompt:parsedResult.data.prompt,
