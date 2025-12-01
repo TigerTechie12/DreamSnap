@@ -44,7 +44,7 @@ return res.status(200).json({modelId:dbData.id,msg:"Training started"})
 })
 app.post('/ai/webhook',async(req,res)=>{
 const {result}=req.body
-if(!result){
+if(!result.images_data_url){
 
     const dbData=await prismaClient.model.update({
     where:{
@@ -105,6 +105,24 @@ const dbData=await prismaClient.outputImages.create({
 })
 return res.status(200).json({ImageId:dbData.id, message:"Generation started"})
 })
+app.post('ai/webhook/generate',async(req,res)=>{
+    const {result}=req.body
+
+if(!result.images_data_url){
+    const dbData=await prismaClient.outputImages.update({
+        where:{id:result.request_id},
+        data:{status:"FAILED"}
+    })
+}
+
+    const dbData=await prismaClient.outputImages.update({
+        where:{id:result.request_id},
+        data:{imageUrl:result.images_data_url,
+        status:"COMPLETED"}
+    })
+})
+
+
 app.post('/ai/pack/generate',async(req,res)=>{
     const packBody=req.body
     const parsedResult=GenerateImagesFromPack.safeParse(packBody)
