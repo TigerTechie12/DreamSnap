@@ -54,6 +54,7 @@ userId String
 eyecolor EyeColorEnum
 trainingImagesUrl String?
 outputImages OutputImages[]
+Packs Packs[]
 imageUrl String
 createdAt DateTime @default(now())
   jobId String?
@@ -84,12 +85,25 @@ status OutputImageStatusEnum @default(PENDING)
 }
 model Packs{
   id String @id @default(uuid())
-  name String
- prompts PackPrompts[]
+userId String
+modelId String 
+model Model @relation(fields:[modelId],references:[id])
+packType String
+status String
+packImages PackImages[]
+totalImages Int
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
 }
-model PackPrompts{
+
+model PackImages{
   id String @id @default(uuid())
-  prompt String
   packId String
-  packs Packs @relation(fields:[packId], references: [id])
+  prompts String
+  status String
+  packs Packs@relation(fields:[packId],references:[id]) 
+  falRequestId String
+  imageUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt  
 }
