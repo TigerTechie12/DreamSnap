@@ -89,7 +89,7 @@ userId String
 modelId String 
 model Model @relation(fields:[modelId],references:[id])
 packType String
-status String
+status OutputImageStatusEnum @default(PENDING)
 packImages PackImages[]
 totalImages Int
 createdAt DateTime @default(now())
@@ -100,7 +100,7 @@ model PackImages{
   id String @id @default(uuid())
   packId String
   prompts String
-  status String
+  status OutputImageStatusEnum @default(PENDING)
   packs Packs@relation(fields:[packId],references:[id]) 
   falRequestId String
   imageUrl String?
