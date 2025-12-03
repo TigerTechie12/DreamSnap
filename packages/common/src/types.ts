@@ -21,5 +21,5 @@ export const GenerateImagesFromPack=z.object({
     modelId:z.string(),
     packType:z.string(),
     totalImages:z.number(),
-    prompts:z.string()
+    prompts:z.array(z.string())
 })

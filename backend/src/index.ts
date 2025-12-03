@@ -124,24 +124,32 @@ if(!result.images_data_url){
 
 
 app.post('/ai/pack/generate',async(req,res)=>{
-    const packBody=req.body
-    const parsedResult=GenerateImagesFromPack.safeParse(packBody)
-    if(!parsedResult.success){
-        return res.status(400).json({message:"Invalid input"})
+  const inputs=req.body
+  const parsedResult=GenerateImagesFromPack.safeParse(inputs)
+if(!parsedResult.success){
+    return res.status(400).json({message:"Invalid input"})
+
+}const dbModel=await prismaClient.model.findUnique({
+    where:{id:parsedResult.data.modelId},
+    select:{status:true,
+        trainingImagesUrl:true
     }
-const prompts=await prismaClient.packPrompts.findMany({
-where:{
-packId:parsedResult.data.packId
+
+
+})
+if(!dbModel || dbModel.status!=="COMPLETED"){
+return res.status(400).json({message:"Model not found or not trained yet"})
 }
-})
-const images=await prismaClient.outputImages.createMany({
-    data:prompts.map((prompt)=>({
-        prompt:prompt.prompt,
-        imageUrl:"",
-        modelId:parsedResult.data.modelId
-    }) )
-})
-return res.status(200).json({})
+const prompts=parsedResult.data.prompts
+const path:any= dbModel.trainingImagesUrl
+prompts.map(async(p:string)=>{const { request_id } = await fal.queue.submit('fal-ai/flux-lora', {
+  input: {
+    prompt:p,
+ loras: [{ path:path, scale: 1.0 }]
+  },
+  webhookUrl: "https://optional.webhook.url/for/results",
+})})
+
 })
 
 
