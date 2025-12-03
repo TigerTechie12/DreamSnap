@@ -86,6 +86,7 @@ status OutputImageStatusEnum @default(PENDING)
 model Packs{
   id String @id @default(uuid())
 userId String
+jobId String
 modelId String 
 model Model @relation(fields:[modelId],references:[id])
 packType String
@@ -99,6 +100,7 @@ updatedAt DateTime @updatedAt
 model PackImages{
   id String @id @default(uuid())
   packId String
+  jobId String?
   prompts String
   status OutputImageStatusEnum @default(PENDING)
   packs Packs@relation(fields:[packId],references:[id]) 

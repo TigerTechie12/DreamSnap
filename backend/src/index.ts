@@ -142,6 +142,7 @@ return res.status(400).json({message:"Model not found or not trained yet"})
 }
 const prompts=parsedResult.data.prompts
 const path:any= dbModel.trainingImagesUrl
+
 prompts.map(async(p:string)=>{const { request_id } = await fal.queue.submit('fal-ai/flux-lora', {
   input: {
     prompt:p,
@@ -149,10 +150,22 @@ prompts.map(async(p:string)=>{const { request_id } = await fal.queue.submit('fal
   },
   webhookUrl: "https://optional.webhook.url/for/results",
 })})
+const dbPack=await prismaClient.packs.create({
+    data:{modelId:parsedResult.data.modelId,
+    packType:parsedResult.data.packType,
+    totalImages:parsedResult.data.totalImages,
+    userId:"test-user-id",
+     
 
+    }
+})
 })
 
+app.post('ai/webhook/pack/generate',(req,res)=>{
+    const {result}=req.body
 
+
+})
 app.get('/pack/bulk',(req,res)=>{
 
 })
