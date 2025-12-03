@@ -120,6 +120,7 @@ if(!result.images_data_url){
         data:{imageUrl:result.images_data_url,
         status:"COMPLETED"}
     })
+    //update s3
 })
 
 
@@ -149,27 +150,43 @@ prompts.map(async(p:string)=>{const { request_id } = await fal.queue.submit('fal
  loras: [{ path:path, scale: 1.0 }]
   },
   webhookUrl: "https://optional.webhook.url/for/results",
-})})
+})
 const dbPack=await prismaClient.packs.create({
     data:{modelId:parsedResult.data.modelId,
     packType:parsedResult.data.packType,
     totalImages:parsedResult.data.totalImages,
     userId:"test-user-id",
-     
+     jobId:request_id
 
     }
 })
 })
 
-app.post('ai/webhook/pack/generate',(req,res)=>{
+})
+
+app.post('ai/webhook/pack/generate',async(req,res)=>{
     const {result}=req.body
 
+if(!result.images_data_url){
+    const dbData=await prismaClient.packImages.update({
+        where:{id:result.request_id},
+        data:{status:"FAILED"}
+    })
+}
 
+    const dbData=await prismaClient.packImages.update({
+        where:{id:result.request_id},
+        data:{imageUrl:result.images_data_url,
+        status:"COMPLETED"}
+    })
+//update s3
 })
 app.get('/pack/bulk',(req,res)=>{
 
 })
-app.get('/image',(req,res)=>{})
+app.get('/image',(req,res)=>{
+    
+})
 
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`)
