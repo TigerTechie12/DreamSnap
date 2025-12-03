@@ -196,8 +196,19 @@ const packs=await prismaClient.packs.findMany({
 return res.status(200).json({packs:packs})
 })
 
-app.get('/pack/:id',(req,res)=>{
+app.get('/pack/:id',async(req,res)=>{
+const id=req.params.id
+const pack=await prismaClient.packImages.findUnique({
+    where:{id:id},
+    select:{
+        prompts:true,
+        imageUrl:true,
+        createdAt:true,
+        
+    }
 
+})
+res.status(200).json({pack:pack})
 })
 app.get('/image',(req,res)=>{
 
