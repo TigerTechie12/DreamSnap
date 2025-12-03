@@ -210,10 +210,38 @@ const pack=await prismaClient.packImages.findUnique({
 })
 res.status(200).json({pack:pack})
 })
-app.get('/image',(req,res)=>{
+app.get('/images/bulk',async(req,res)=>{
+
+const userId=req.userId
+const images=await prismaClient.outputImages.findMany({
+    where:{userId:userId},
+    select:{imageUrl:true,
+        createdAt:true,
+        prompt:true,
+        id:true
+    }
+})
+return res.status(200).json({images:images})
 
 })
 
+app.get('/images:id',async(req,res)=>{
+
+const id=req.params.id
+const images=await prismaClient.outputImages.findUnique({
+    where:{id:id},
+    select:{
+        prompt:true,
+        imageUrl:true,
+        createdAt:true,
+        
+    }
+
+})
+res.status(200).json({images:images})})
+app.put(()=>{})
+app.delete(()=>{})
+app.delete(()=>{})
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`)
 })
