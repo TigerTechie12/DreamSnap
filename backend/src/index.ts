@@ -181,11 +181,26 @@ if(!result.images_data_url){
     })
 //update s3
 })
-app.get('/pack/bulk',(req,res)=>{
+app.get('/packs/bulk',async(req,res)=>{
+const userId=req.userId
+const packs=await prismaClient.packs.findMany({
+    where:{userId:userId},
+    select:{
+        packType:true,
+        totalImages:true,
+        createdAt:true,
+        id:true,
+        modelId:true
+    }
+})
+return res.status(200).json({packs:packs})
+})
+
+app.get('/pack/:id',(req,res)=>{
 
 })
 app.get('/image',(req,res)=>{
-    
+
 })
 
 app.listen(PORT,()=>{
