@@ -275,12 +275,29 @@ prompts.map(async(p:string)=>{const { request_id } = await fal.queue.submit('fal
   },
   webhookUrl: "https://optional.webhook.url/for/results",
 })
+const dbUpdate=await prismaClient.packImages.updateMany({
+    where:{packId:id},
+    data:{falRequestId:request_id}
+})
+
 
     return res.status(200).json({message:"Pack updated"
     })
 })})
 
-
+app.post('/update/packImages/webhook',async(req,res)=>{
+    const {result}=req.body
+if(!result.images_data_url){
+    return res.status(400).json({message:"No images updated"})
+}
+const dbUpdate=await prismaClient.packImages.updateMany({
+where:{falRequestId:result.request_id},
+data:{imageUrl:result.images_data_url,
+status:"COMPLETED",
+updatedAt: new Date()}
+})
+return res.status(200).json({message:"Pack Images updated"})
+})
 
 app.delete('/image/:id',async(req,res)=>{
     const id=req.params.id
