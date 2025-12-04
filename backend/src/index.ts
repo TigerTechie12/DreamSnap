@@ -1,10 +1,23 @@
 import express from 'express'
 import { fal } from '@fal-ai/client'
+import 'dotenv/config'
+import { clerkMiddleware,clerkClient, requireAuth, getAuth } from '@clerk/express'
 import { TrainModel,GenerateImage,GenerateImagesFromPack } from 'common'
 import {prismaClient} from "db"
 const PORT =process.env.PORT || 8080
 const app=express()
 app.use(express.json())
+app.use(clerkMiddleware())
+app.get('/protected', requireAuth(), async (req, res) => {
+ 
+  const { userId }:any = getAuth(req)
+
+  
+  const user = await clerkClient.users.getUser(userId)
+
+  return res.json({ user })
+})
+
 app.post('/ai/training',async(req,res)=>{
 const input=req.body
 
