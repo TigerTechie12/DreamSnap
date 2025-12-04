@@ -239,9 +239,52 @@ const images=await prismaClient.outputImages.findUnique({
 
 })
 res.status(200).json({images:images})})
-app.put(()=>{})
-app.delete(()=>{})
-app.delete(()=>{})
+app.put('/update/pack:id',async(req,res)=>{
+    const id=req.params.id
+    const inputs=req.body
+    const validatedInputs=GenerateImagesFromPack.safeParse(inputs)
+    if(!validatedInputs.success){
+        return res.status(400).json({message:"Invalid input"})
+    }
+    const packUpdate=await prismaClient.packs.update({
+        where:{id:id},
+        data:{packType:validatedInputs.data.packType,
+        totalImages:validatedInputs.data.totalImages,
+        updatedAt:new Date()
+    }
+
+    })
+    const prompts=validatedInputs.data.prompts
+    const packImagesUpdate=await prismaClient.packImages.updateMany({
+    where:{packId:id},
+    data:{updatedAt:new Date(),
+    prompts:validatedInputs.data.prompts.join(","),}
+    })
+   
+const dbModel=await prismaClient.model.findUnique({
+    where:{id:validatedInputs.data.modelId},
+    select:{status:true,
+        trainingImagesUrl:true
+    }})
+const path:any=dbModel?.trainingImagesUrl
+
+prompts.map(async(p:string)=>{const { request_id } = await fal.queue.submit('fal-ai/flux-lora', {
+  input: {
+    prompt:p,
+ loras: [{ path:path, scale: 1.0 }]
+  },
+  webhookUrl: "https://optional.webhook.url/for/results",
+})
+
+    return res.status(200).json({message:"Pack updated"
+    })
+})})
+
+
+
+app.delete('/image/:id',async(req,res)=>{})
+app.delete('/pack/:id',async(req,res)=>{})
+app.delete('/packimage/:id',async(req,res)=>{})
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`)
 })
