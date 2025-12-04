@@ -282,9 +282,27 @@ prompts.map(async(p:string)=>{const { request_id } = await fal.queue.submit('fal
 
 
 
-app.delete('/image/:id',async(req,res)=>{})
-app.delete('/pack/:id',async(req,res)=>{})
-app.delete('/packimage/:id',async(req,res)=>{})
+app.delete('/image/:id',async(req,res)=>{
+    const id=req.params.id
+    const deleteImage=await prismaClient.outputImages.delete({
+        where:{id:id},
+    })
+    return res.status(200).json({message:"Image Deleted!"})
+})
+app.delete('/pack/:id',async(req,res)=>{
+    const id=req.params.id
+    const deletePack=await prismaClient.packs.delete({
+        where:{id:id},
+    })
+    return res.status(200).json({message:"Pack Deleted!"})
+})
+app.delete('/packimage/:id',async(req,res)=>{
+    const id=req.params.id
+    const deletePackImage=await prismaClient.packImages.delete({
+        where:{id:id},
+    })
+    return res.status(200).json({message:"Pack Image Deleted!"})
+})
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`)
 })
