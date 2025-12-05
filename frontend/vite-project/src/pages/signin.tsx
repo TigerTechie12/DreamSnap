@@ -13,15 +13,23 @@ export function Signin() {
     </div>
 <div className="flex-col">
     {signin ? <h1 className='font-bold font-white'>Welcome Back</h1> : <h1 className='font-bold font-white'>Create your account</h1>}
-    <h1 className='font-bold font-white'>Welcome Back</h1>
-<h3>Sign in to continue creating amazing AI photos</h3>
+   {signin ? <h3>Sign in to continue creating amazing AI photos</h3> : <h3>Sign up to start creating amazing AI photos</h3>} 
+{!signin ? <div className='flex-col'>
+    <div className='font-white'>First Name</div>
+    <input type='text' placeholder='John' className='border-2 border-gray-300 rounded-lg p-2 w-96'/>
+    <div className='font-white'>Last Name</div>
+    <input type='text' placeholder='Doe' className='border-2 border-gray-300 rounded-lg p-2 w-96'/>
+</div> : null}
 <div>Email Address</div>
 <input type="text" placeholder='john@example.com' className='border-2 border-gray-300 rounded-lg p-2 w-96'>
 
 </input>
-<div>Password</div>
+<div className='flex'><div>Password</div> {signin ? <button className='font-blue'>Forgot Password</button> : null}</div>
+
 <input type="password" placeholder='Enter your password' className='border-2 border-gray-300 rounded-lg p-2 w-96'/>
-<button className='bg-blue-500 pl-6 pr-6 pt-3 pb-3 font-black'>Sign In</button>
+
+<button className='bg-blue-500 pl-6 pr-6 pt-3 pb-3 font-black'> {signin ? 'Sign in' : 'Sign up'}</button>
+{signin ? <div>Don't have an account? <button className='font-blue' onClick={()=>{setSignin(false)}}>Sign up</button></div>:}
 
 </div>
     </div>
