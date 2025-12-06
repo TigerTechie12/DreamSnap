@@ -1,8 +1,11 @@
 import { CameraIcon } from '@heroicons/react/24/solid'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 export function Signin() {
  const [signin,setSignin]=useState(true)
-    return (
+const navigate=useNavigate()
+
+ return (
         <div>
     <div className='bg-black'>
     <div className="flex">
@@ -24,7 +27,7 @@ export function Signin() {
 <input type="text" placeholder='john@example.com' className='border-2 border-gray-300 rounded-lg p-2 w-96'>
 
 </input>
-<div className='flex'><div>Password</div> {signin ? <button className='font-blue'>Forgot Password</button> : null}</div>
+<div className='flex'><div>Password</div> {signin ? <button onClick={()=>{navigate('/forgotpassword')}} className='font-blue'>Forgot Password</button> : null}</div>
 
 <input type="password" placeholder='Enter your password' className='border-2 border-gray-300 rounded-lg p-2 w-96'/>
 
