@@ -1,26 +1,6 @@
 import { CameraIcon } from '@heroicons/react/24/solid'
-import {useState} from 'react'
-export function Sidebar() {
-    const [name,setName]=useState('')
-    const [initials,setInitials]=useState('')
-const token=localStorage.getItem('token')
-if(token){
-    const tokenArray=token.split(" ")
-const payload=tokenArray[1]
-const decodedPayload=atob(payload)
-const parsedData=JSON.parse(decodedPayload)
-const obtainedName=parsedData.name
-const nameWithoutSpaces=obtainedName.trim()
-const firstLetter=nameWithoutSpaces.charAt(0).toUpperCase()
 
-const nameWordsArray=nameWithoutSpaces.split(" ")
-const index=nameWordsArray.length-1
-const lastWord=nameWordsArray[index]
-const lastLetter=lastWord.charAt(0).toUpperCase()
-const initials=firstLetter+lastLetter
-setInitials(initials)
-setName(obtainedName)
-}
+export function Sidebar({name,initials}:any){ 
 
     return(<div>
        <div> <button className="p-3 bg-blue-500 hover:bg-blue-600 rounded-full text-white transition-colors">
