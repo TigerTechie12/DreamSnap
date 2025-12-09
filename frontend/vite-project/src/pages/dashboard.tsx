@@ -1,7 +1,10 @@
 import {Navbar} from "../components/navbar"
 import {Sidebar} from "../components/sidebar"
 import {useState} from "react"
-function Dashboard(){
+import axios from "axios"
+import { useNavigate } from "react-router-dom"
+export function Dashboard(){
+    const navigate=useNavigate()
       const [name,setName]=useState('')
     const [initials,setInitials]=useState('')
 const token=localStorage.getItem('token')
@@ -24,6 +27,18 @@ setName(obtainedName)}
     return <div>
 <Navbar></Navbar>
 <Sidebar name={name} initials={initials}></Sidebar>
+<h1 className="font-semibold font-white">Welcome back, {name}!</h1>
+<h2>Ready to create some amazing AI photos?</h2>
+<div className="flex"><span></span>
+<span></span></div>
+<div className=" flex flex-col">
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+</div>
 
+ 
     </div>
 }
