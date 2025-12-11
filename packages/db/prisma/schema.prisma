@@ -8,11 +8,6 @@ generator client {
   provider = "prisma-client-js"
 // output   = "../generated/prisma"
 }
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
 model User{
   id String @id @default(uuid())
   username String
@@ -20,6 +15,7 @@ model User{
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   models Model[]
+  outputImages OutputImages[]
 }
 
 enum ModelTypeEnum{
@@ -76,6 +72,8 @@ model OutputImages{
   id String @id @default(uuid())
   imageUrl String?
   modelId String
+  userid String
+  user User @relation(fields:[userid],references: [id])
 model Model @relation(fields:[modelId],references: [id])
 jobid String
 createdAt DateTime @default(now())

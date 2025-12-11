@@ -15,6 +15,6 @@ export default {
   },
   engine: "classic" as const,
   datasource: {
-    url: env("DATABASE_URL"),
+    url: process.env.DATABASE_URL || env("DATABASE_URL"),
   },
 };
