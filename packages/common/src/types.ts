@@ -10,16 +10,19 @@ ethinicity:z.enum(["White","Black","AsianAmerican","EastAsian","SouthEastAsian",
 eye_color:z.enum(["Brown","Blue","Hazel","Gray"]),
 bald:z.boolean(),
 images:z.array(z.string()),
+userId:z.string(),
 imageUrl:z.string()
 
 })
 export const GenerateImage=z.object({
     prompt:z.string(),
+    userId:z.string(),
     modelId:z.string()
 })
 export const GenerateImagesFromPack=z.object({
     modelId:z.string(),
     packType:z.string(),
+    userId:z.string(),
     totalImages:z.number(),
     prompts:z.array(z.string())
 })

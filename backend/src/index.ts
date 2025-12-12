@@ -22,7 +22,7 @@ app.post('/ai/training',async(req,res)=>{
 const input=req.body
 
 
-const userId="test-user-id"
+
 const parsedResult=TrainModel.safeParse(input)
 if(!parsedResult.success){
 return res.status(400).json({message:"Invalid input"})
@@ -44,9 +44,10 @@ const dbData=await prismaClient.model.create({
         ethinicity:parsedResult.data.ethinicity,
         eyecolor:parsedResult.data.eye_color,
         bald:parsedResult.data.bald,
-        userId:userId,
+        userId:parsedResult.data.userId,
         imageUrl:parsedResult.data.imageUrl,
-        jobId:request_id     
+        jobId:request_id
+
     }
 
 })
@@ -69,6 +70,7 @@ status:"FAILED"
 
 }
 })
+return res.status(200).json({message:"Training failed"})
 }
 const dbData=await prismaClient.model.update({
     where:{
@@ -112,8 +114,8 @@ const dbData=await prismaClient.outputImages.create({
     data:{
             prompt:parsedResult.data.prompt,
             modelId:parsedResult.data.modelId,
-            jobid:request_id
-            
+            jobid:request_id,
+            userId:parsedResult.data.userId
     }
 })
 return res.status(200).json({ImageId:dbData.id, message:"Generation started"})
@@ -126,15 +128,28 @@ if(!result.images_data_url){
         where:{id:result.request_id},
         data:{status:"FAILED"}
     })
+return res.status(200).json({message:"Image generation failed"})
 }
 
     const dbData=await prismaClient.outputImages.update({
         where:{id:result.request_id},
         data:{imageUrl:result.images_data_url,
-        status:"COMPLETED"}
+        status:"COMPLETED"   
+    }
     })
+
+const Id:any=await prismaClient.outputImages.findUnique({
+    where:{id:result.request_id},  
+    select:{userId:true} 
+
+
     //update s3
 })
+const incrementUserImageCount=await prismaClient.user.update({
+where:{id:Id.userId},
+data:{
+    numberOfImages:{increment:1}
+}})})
 
 
 app.post('/ai/pack/generate',async(req,res)=>{
@@ -168,7 +183,7 @@ const dbPack=await prismaClient.packs.create({
     data:{modelId:parsedResult.data.modelId,
     packType:parsedResult.data.packType,
     totalImages:parsedResult.data.totalImages,
-    userId:"test-user-id",
+    userId:parsedResult.data.userId,
      jobId:request_id
 
     }
@@ -193,6 +208,19 @@ if(!result.images_data_url){
         status:"COMPLETED"}
     })
 //update s3
+
+const Id:any=await prismaClient.packs.findUnique({
+    where:{id:result.request_id},  
+    select:{userId:true}
+})
+
+const Increment=await prismaClient.user.update({
+where:{id:Id.userId},
+data:{
+    numberOfPacks:{increment:1}
+}
+})
+
 })
 app.get('/packs/bulk',async(req,res)=>{
 const userId=req.userId

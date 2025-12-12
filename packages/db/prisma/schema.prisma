@@ -8,6 +8,10 @@ generator client {
   provider = "prisma-client-js"
 // output   = "../generated/prisma"
 }
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 model User{
   id String @id @default(uuid())
   username String
@@ -15,6 +19,9 @@ model User{
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   models Model[]
+  numberOfImages Int @default(0)
+  numberOfPacks Int @default(0)
+  packs Packs[]
   outputImages OutputImages[]
 }
 
@@ -51,7 +58,9 @@ eyecolor EyeColorEnum
 trainingImagesUrl String?
 outputImages OutputImages[]
 Packs Packs[]
+  numberOfImages Int
 imageUrl String
+numberOfPacks Int 
 createdAt DateTime @default(now())
   jobId String?
 updatedAt DateTime @updatedAt
@@ -72,8 +81,8 @@ model OutputImages{
   id String @id @default(uuid())
   imageUrl String?
   modelId String
-  userid String
-  user User @relation(fields:[userid],references: [id])
+  userId String
+  user User @relation(fields:[userId],references: [id])
 model Model @relation(fields:[modelId],references: [id])
 jobid String
 createdAt DateTime @default(now())
@@ -85,7 +94,8 @@ model Packs{
   id String @id @default(uuid())
 userId String
 jobId String
-modelId String 
+modelId String
+user User @relation(fields:[userId],references:[id])
 model Model @relation(fields:[modelId],references:[id])
 packType String
 status OutputImageStatusEnum @default(PENDING)
