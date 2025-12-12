@@ -138,18 +138,12 @@ return res.status(200).json({message:"Image generation failed"})
     }
     })
 
-const Id:any=await prismaClient.outputImages.findUnique({
-    where:{id:result.request_id},  
-    select:{userId:true} 
 
 
     //update s3
+
+
 })
-const incrementUserImageCount=await prismaClient.user.update({
-where:{id:Id.userId},
-data:{
-    numberOfImages:{increment:1}
-}})})
 
 
 app.post('/ai/pack/generate',async(req,res)=>{
@@ -209,17 +203,8 @@ if(!result.images_data_url){
     })
 //update s3
 
-const Id:any=await prismaClient.packs.findUnique({
-    where:{id:result.request_id},  
-    select:{userId:true}
-})
 
-const Increment=await prismaClient.user.update({
-where:{id:Id.userId},
-data:{
-    numberOfPacks:{increment:1}
-}
-})
+
 
 })
 app.get('/packs/bulk',async(req,res)=>{
@@ -234,7 +219,8 @@ const packs=await prismaClient.packs.findMany({
         modelId:true
     }
 })
-return res.status(200).json({packs:packs})
+const numberOfPacks=packs.length
+return res.status(200).json({packs:packs, numberOfPacks:numberOfPacks})
 })
 
 app.get('/pack/:id',async(req,res)=>{
@@ -262,7 +248,9 @@ const images=await prismaClient.outputImages.findMany({
         id:true
     }
 })
-return res.status(200).json({images:images})
+const numberOfImages=images.length
+
+return res.status(200).json({images:images, numberOfImages:numberOfImages})
 
 })
 
