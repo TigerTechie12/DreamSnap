@@ -1,6 +1,6 @@
 import {Navbar} from "../components/navbar"
 import {Sidebar} from "../components/sidebar"
-import {useState} from "react"
+import {useState,useEffect} from "react"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 export function Dashboard(){
@@ -27,6 +27,24 @@ const lastLetter=lastWord.charAt(0).toUpperCase()
 const initials=firstLetter+lastLetter
 setInitials(initials)
 setName(obtainedName)}
+
+    useEffect(()=>{
+const fetchingImages=async()=>{
+    const imagesData:any=await axios.get('')
+    const number=imagesData.data.numberOfImages
+setImagesCreated(number)}
+
+const fetchingPacks=async ()=>{
+const packsData:any=await axios.get('')
+const number=packsData.data.numberOfPacks
+setPacksGenerated(number)
+}
+const fetchingModels=async()=>{
+    
+}
+
+},[imagesCreated,packsGenerated,modelsTrained])
+
     return <div>
 <Navbar></Navbar>
 <Sidebar name={name} initials={initials}></Sidebar>

@@ -1,8 +1,10 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import axios from "axios"
 export function MyPacks(){
     const [packs,setPacks]=useState([])
-    const [numberOfPacks,setNumberOfPacks]=useState(0)
-    const [totalImages,setTotalImages]=useState(0)  
+   
+
+
 return <div>
     <h1>My Packs</h1>
     <h4>{numberOfPacks} completed packs with total {totalImages} images</h4>
