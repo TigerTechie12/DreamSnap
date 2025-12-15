@@ -56,9 +56,7 @@ eyecolor EyeColorEnum
 trainingImagesUrl String?
 outputImages OutputImages[]
 Packs Packs[]
-  numberOfImages Int
 imageUrl String
-numberOfPacks Int 
 createdAt DateTime @default(now())
   jobId String?
 updatedAt DateTime @updatedAt
