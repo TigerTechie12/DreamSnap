@@ -349,6 +349,42 @@ app.delete('/packimage/:id',async(req,res)=>{
     })
     return res.status(200).json({message:"Pack Image Deleted!"})
 })
+app.get('/models/bulk',async(req,res)=>{
+    const userId=req.userId
+const dbData=await prismaClient.model.findMany({
+where:{userId:userId},
+select:{name:true,
+    gender:true,
+age:true,
+bald:true,
+ethinicity:true,
+eyecolor:true,
+createdAt:true,
+updatedAt:true,
+status:true
+
+}
+})
+return res.json({dbData})
+})
+app.get('/models:id',async(req,res)=>{
+    const id=req.params.id
+const dbData=await prismaClient.model.findUnique({
+    where:{id:id},
+    select:{
+name:true,
+    gender:true,
+age:true,
+bald:true,
+ethinicity:true,
+eyecolor:true,
+createdAt:true,
+updatedAt:true,
+status:true
+    }
+})
+res.json({dbData})
+})
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`)
 })

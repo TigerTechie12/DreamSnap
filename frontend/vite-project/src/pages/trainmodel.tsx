@@ -87,6 +87,7 @@ const [bald,setBald]=useState("")
 <button className="bg-blue-500 pt-2 pb-2 pr-4 pl-4" onClick={()=>{useEffect(()=>{
     const trainingModelData=async ()=>{
         const dbUpdate=await axios.post('',{name:{name},gender:{gender},age:{age},bald:{bald},ethinicity:{ethinicity},eyecolor:{eyeColor}})
+    console.log(dbUpdate)
     }
 },[])}}>Start Training</button>
     </div>
