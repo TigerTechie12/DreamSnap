@@ -12,7 +12,16 @@ createdAt:string
 updateAt:string
 
 }
+interface Prompts{
+prompts:string
+}
     const [packs,setPacks]=useState<Packs[]>([])
+    const [prompts,setPrompts]=useState<Prompts[]>([])
+    const [packType,setPackType]=useState("")
+    const [images,setImages]=useState(0)
+    const [prompt,setPrompt]=useState("")
+    const [packName,setPackName]=useState("")
+   
 useEffect(()=>{
 const fetching=async()=>{
     const genpacks:any=await axios.get('')
@@ -30,13 +39,53 @@ return <div>
 <h3>Define your pack details and add multiple prompts. Each prompt will generate variations based on the total images specified.</h3>
 <div className="flex flex-col">
     <h2>Pack Name</h2>
-    <input type="text" className="border-r-2" placeholder="e.g.,Valentine's Collection,Beach Vibes" />
+    <input type="text" value={packName} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setPackName(e.target.value)}} className="border-r-2" placeholder="e.g.,Valentine's Collection,Beach Vibes" />
 <h2>Pack Type</h2>
- <input type="text" className="border-r-2" placeholder="e.g.,Valentine's,Beach,Royal,Adventure" />
-
+ <input type="text" value={packType} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setPackType(e.target.value)}} className="border-r-2" placeholder="e.g.,Valentine's,Beach,Royal,Adventure" />
+<h2>Total Images in Pack</h2>
+<input type="number" value={images} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setImages(+e.target.value)}} className="border-r-2" />
+<h2>Select Model</h2>
+<input type="text" />
+<div className="flex justify-between">
+    <h2>Prompts</h2>
+<button onClick={()=>{}} className="border-r-2">+ Add Prompt</button>
+{
+    prompts.map((p,index)=>(
+        <div key={index}>
+            
+        </div>
+    ))
+}
+</div>
+<input type="text" />
+<span className="p-2 ">
+    <h3>Pack Summary</h3>
+    <div className="flex-col">
+        
+        <div className="justify-between">
+            <div>Pack Name:</div>
+            <div>{packName}</div>
+        </div>
+        <div className="justify-between">
+            <div>Pack Type:</div>
+            <div>{packType}</div>
+        </div>
+        <div className="justify-between">
+        <div>Total Images:</div>
+        <div>{images}</div>
+        </div>
+        <div className="justify-between">
+            <div>Prompts:</div>
+            <div>{prompts}</div>
+        </div>
+    </div>
+</span>
+<button className="bg-blue-600 pl-5 pr-5 pt-2 pb-2 text-black">
+    Create Pack
+</button>
 </div>
 </div>
-
+ 
 )}
 
     <h3>Create and manage themed image collections with custom prompts</h3>
