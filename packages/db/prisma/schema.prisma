@@ -53,10 +53,10 @@ bald Boolean
 ethinicity EthinictyEnum
 userId String
 eyecolor EyeColorEnum
-trainingImagesUrl String?
+trainingImagesUrl String[]
 outputImages OutputImages[]
 Packs Packs[]
-imageUrl String
+imageUrl String[]
 createdAt DateTime @default(now())
   jobId String?
 updatedAt DateTime @updatedAt
@@ -75,7 +75,7 @@ enum OutputImageStatusEnum{
 }
 model OutputImages{
   id String @id @default(uuid())
-  imageUrl String?
+  imageUrl String[]
   modelId String
   userId String
   user User @relation(fields:[userId],references: [id])
@@ -109,7 +109,7 @@ model PackImages{
   status OutputImageStatusEnum @default(PENDING)
   packs Packs@relation(fields:[packId],references:[id]) 
   falRequestId String
-  imageUrl String?
+  imageUrl String[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt  
 }

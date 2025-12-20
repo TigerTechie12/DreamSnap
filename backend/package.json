@@ -13,14 +13,19 @@
   "dependencies": {
     "@clerk/express": "^1.7.54",
     "@fal-ai/client": "^1.7.2",
+    "adm-zip": "^0.5.16",
+    "aws-sdk": "^2.1693.0",
+    "axios": "^1.13.2",
     "common": "file:C:/Users/Shreyash Srivastava/Documents/DreamSnap/packages/common",
+    "cors": "^2.8.5",
     "db": "file:C:/Users/Shreyash Srivastava/Documents/DreamSnap/packages/db",
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "multer": "^2.0.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.5",
     "@types/node": "^24.10.1",
-    "express": "^5.1.0",
+    "express": "^5.2.1",
     "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"

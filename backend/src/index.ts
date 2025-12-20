@@ -5,9 +5,15 @@ import { clerkMiddleware,clerkClient, requireAuth, getAuth } from '@clerk/expres
 import { TrainModel,GenerateImage,GenerateImagesFromPack } from 'common'
 import {prismaClient} from "db"
 const PORT =process.env.PORT || 8080
+const AWS = require('aws-sdk')
+const cors = require('cors')
 const app=express()
+require('dotenv').config()
+import axios from 'axios'
+const AdmZip = require('adm-zip')
 app.use(express.json())
 app.use(clerkMiddleware())
+app.use(cors())
 app.get('/protected', requireAuth(), async (req, res) => {
  
   const { userId }:any = getAuth(req)
@@ -18,12 +24,76 @@ app.get('/protected', requireAuth(), async (req, res) => {
   return res.json({ user })
 })
 
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION
+})
+const BUCKET_NAME = process.env.S3_BUCKET_NAME
+async function downloadAndUploadToS3(imageUrl: string, folder: string, filename: string) {
+  try {
+
+    const response = await axios.get(imageUrl, {
+      responseType: 'arraybuffer'
+    })
+
+    const imageBuffer = Buffer.from(response.data)
+    const key = `${folder}/${Date.now()}-${filename}`
+
+    
+    const uploadParams = {
+      Bucket: BUCKET_NAME,
+      Key: key,
+      Body: imageBuffer,
+      ContentType: 'image/png',
+      ACL: 'public-read'
+    }
+
+    await s3.upload(uploadParams).promise()
+
+    
+    return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`
+  } catch (error) {
+    console.error('Error uploading to S3:', error)
+    throw error
+  }
+}
+app.post('/api/get-upload-url', async (req, res) => {
+  const { fileName, fileType } = req.body
+
+  if (!fileName || !fileType) {
+    return res.status(400).json({ error: 'fileName and fileType required' })
+  }
+
+  const key = `user-uploads/${Date.now()}-${fileName}`
+
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key: key,
+    ContentType: fileType,
+    Expires: 300, 
+  };
+
+  try {
+    const uploadURL = await s3.getSignedUrlPromise('putObject', params)
+
+
+    const publicURL = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`
+
+    res.json({
+      uploadURL,
+      key,
+      publicURL
+    });
+  } catch (error) {
+    console.error('Error generating presigned URL:', error)
+    res.status(500).json({ error: 'Failed to generate upload URL' })
+  }
+})
 app.post('/ai/training',async(req,res)=>{
 const input=req.body
-
-
-
 const parsedResult=TrainModel.safeParse(input)
+
 if(!parsedResult.success){
 return res.status(400).json({message:"Invalid input"})
 
@@ -72,15 +142,8 @@ status:"FAILED"
 })
 return res.status(200).json({message:"Training failed"})
 }
-const dbData=await prismaClient.model.update({
-    where:{
-        id:result.request_id
-    },
-    data:{
-trainingImagesUrl :result.images_data_url,
-status:"COMPLETED"
-    }
-})})
+ 
+})
 
 
 app.post('/ai/generate',async(req,res)=>{
@@ -136,11 +199,40 @@ return res.status(200).json({message:"Image generation failed"})
         data:{imageUrl:result.images_data_url,
         status:"COMPLETED"   
     }
+
     })
 
 
+try{ const s3Urls: string[] = []
 
-    //update s3
+    for (let i = 0; i < result.images.length; i++) {
+      const falImageUrl = result.images[i].url
+      const s3Url = await downloadAndUploadToS3(
+        falImageUrl,
+        'generated-images',
+        `image-${i}.png`
+      )
+      s3Urls.push(s3Url)
+    }
+
+const dbData=await prismaClient.model.update({
+    where:{
+        id:result.request_id
+    },
+    data:{
+trainingImagesUrl :s3Urls,
+status:"COMPLETED"
+    }
+})}
+catch (error) {
+    console.error('Error in generate webhook:', error)
+    await prismaClient.outputImages.update({
+      where: { id: result.request_id },
+      data: { status: "FAILED" }
+    })
+    res.status(500).json({ message: "Failed to upload images to S3" })
+  }
+
 
 
 })
@@ -201,8 +293,39 @@ if(!result.images_data_url){
         data:{imageUrl:result.images_data_url,
         status:"COMPLETED"}
     })
-//update s3
 
+ try {
+   
+    const s3Urls: string[] = []
+
+    for (let i = 0; i < result.images.length; i++) {
+      const falImageUrl = result.images[i].url
+      const s3Url = await downloadAndUploadToS3(
+        falImageUrl,
+        'pack-images',
+        `pack-image-${i}.png`
+      )
+      s3Urls.push(s3Url)
+    }
+
+    
+    await prismaClient.packImages.update({
+      where: { id: result.request_id },
+      data: {
+        imageUrl: s3Urls,
+        status: "COMPLETED"
+      }
+    })
+
+    res.status(200).json({ message: "Pack images uploaded to S3" })
+  } catch (error) {
+    console.error('Error in pack generate webhook:', error)
+    await prismaClient.packImages.update({
+      where: { id: result.request_id },
+      data: { status: "FAILED" }
+    })
+    res.status(500).json({ message: "Failed to upload pack images to S3" })
+  }
 
 
 
@@ -319,13 +442,33 @@ app.post('/update/packImages/webhook',async(req,res)=>{
 if(!result.images_data_url){
     return res.status(400).json({message:"No images updated"})
 }
-const dbUpdate=await prismaClient.packImages.updateMany({
-where:{falRequestId:result.request_id},
-data:{imageUrl:result.images_data_url,
-status:"COMPLETED",
-updatedAt: new Date()}
-})
-return res.status(200).json({message:"Pack Images updated"})
+ try {
+    const s3Urls: string[] = []
+
+    for (let i = 0; i < result.images.length; i++) {
+      const falImageUrl = result.images[i].url
+      const s3Url = await downloadAndUploadToS3(
+        falImageUrl,
+        'updated-pack-images',
+        `updated-${i}.png`
+      )
+      s3Urls.push(s3Url)
+    }
+
+    await prismaClient.packImages.updateMany({
+      where: { falRequestId: result.request_id },
+      data: {
+        imageUrl: s3Urls,
+        status: "COMPLETED",
+        updatedAt: new Date()
+      }
+    })
+
+    return res.status(200).json({ message: "Pack Images updated" })
+  } catch (error) {
+    console.error('Error updating pack images:', error)
+    res.status(500).json({ message: "Failed to update pack images" })
+  }
 })
 
 app.delete('/image/:id',async(req,res)=>{
