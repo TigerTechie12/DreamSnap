@@ -22,7 +22,8 @@ interface Models{
     const [packName,setPackName]=useState("")
     const [trainedModels,setTrainedModels]=useState<Models[]>([])
     const [inputs,setInputs]=useState<string[]>([""])   
-   
+   const [showModal,setShowModal]=useState(false)
+   const [updateShowModal,setUpdateShowModal]=useState(false)
     useEffect(()=>{
         const fetch=async()=>{
             const trainedModels:any=await axios.get('')
@@ -35,7 +36,7 @@ const fetching=async()=>{
     setPacks(genpacks)
 } 
 },[])   
-const [showModal,setShowModal]=useState(false)
+
 
 return <div>
    <div className="flex"><h1>Photo Packs</h1> <button onClick={()=>{setShowModal(true)}} className="bg-blue-500"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-indigo-500">
@@ -96,7 +97,16 @@ return <div>
         </div>
     </div>
 </span>
-<button className="bg-blue-600 pl-5 pr-5 pt-2 pb-2 text-black">
+<button className="bg-blue-600 pl-5 pr-5 pt-2 pb-2 text-black"
+onClick={()=>{
+    useEffect(()=>{const post=async()=>{await axios.post('',{
+        prompts:{prompts},
+        images:{images},
+        packType:{packType},
+        packName:{packName}
+    })}},[])
+}}
+>
     Create Pack
 </button>
 </div>
@@ -117,7 +127,59 @@ return <div>
  </h2>
 {packs.map((p)=>(p.status ==='PENDING' ? <div className="border-y-sky-600 rounded-2xl">{p.id} {p.modelId} {p.packType} {p.totalImages} {p.createdAt} {p.updateAt}</div> : null))}
 <h2>Completed Packs</h2>
-{packs.map((p)=>(p.status ==='COMPLETED' ? <div className="border-y-sky-600 rounded-2xl">{p.id} {p.modelId} {p.packType} {p.totalImages} {p.createdAt} {p.updateAt}</div> : null))}
+{packs.map((p)=>(p.status ==='COMPLETED' ? <div className="border-blue-200 rounded-2xl flex"> <div className="border-y-sky-600 rounded-2xl">{p.id} {p.modelId} {p.packType} {p.totalImages} {p.createdAt} {p.updateAt}</div>
+<button className="bg-blue-600" onClick={()=>{
+    setUpdateShowModal(true)
+    useEffect(()=>{
+        const update=async()=>{axios.put('',{
+            packName:{packName},
+            packType:{packType},
+            images:{images},
+            prompts:{prompts}
+
+        })}
+    },[])
+}}>+ Add Images</button>
+{updateShowModal && createPortal(
+    <div>
+        <div>Add More Images</div>
+         <h2>Pack Name</h2>
+    <input type="text" value={packName} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setPackName(e.target.value)}} className="border-r-2" placeholder="e.g.,Valentine's Collection,Beach Vibes" />
+<h2>Pack Type</h2>
+ <input type="text" value={packType} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setPackType(e.target.value)}} className="border-r-2" placeholder="e.g.,Valentine's,Beach,Royal,Adventure" />
+<h2>Total Images in Pack</h2>
+<input type="number" value={images} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setImages(+e.target.value)}} className="border-r-2" />
+<h2>Select Model</h2>
+ <input list="trained-models" id="trained-models" name="trained-models-choice" /> 
+
+<datalist id="trained-models">
+{   trainedModels.map((t,index)=>(
+<option value={t.name} key={index}></option>
+   ))}
+</datalist>
+<div className="flex justify-between">
+    <h2>Prompts</h2>
+<button onClick={()=>{
+    
+   setInputs([...inputs,""])
+    
+}} className="border-r-2">+ Add Prompt</button>
+{
+  inputs.map((i:any)=>(<input type="text" placeholder="Type your prompt" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
+    setPrompts([...prompts,e.target.value])
+  }} />))  
+}</div>
+        
+    </div>
+    ,document.body
+)
+
+}
+<button className="bg-red-500" onClick={()=>{
+      useEffect(()=>{
+        const del=async()=>{axios.delete('')}
+    },[]) 
+}}>Delete</button></div> : null))}
 <div></div>
 </div>
 }

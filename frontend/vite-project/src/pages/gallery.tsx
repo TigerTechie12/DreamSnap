@@ -33,14 +33,16 @@ return <div>
 
 <div>
 {photos.map((p)=>(
-p.status==='COMPLETED' ? <div className='border-b-amber-200'>
+p.status==='COMPLETED' ? <div className='flex'><div className='border-b-amber-200'>
 {p.imageUrl}
 {p.id}
 {p.modelId}
 {p.createdAt}
 {p.updatedAt}
 {p.prompt}
-
+</div><button className='bg-red-600' onClick={()=>{
+  useEffect(()=>{const del=async()=>{await axios.delete('')}},[]) 
+}}>Delete</button> 
 </div> : null
 ))}
 </div>
