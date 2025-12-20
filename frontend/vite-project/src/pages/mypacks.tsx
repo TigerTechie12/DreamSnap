@@ -12,16 +12,23 @@ createdAt:string
 updateAt:string
 
 }
-interface Prompts{
-prompts:string
+interface Models{
+    name:string
 }
     const [packs,setPacks]=useState<Packs[]>([])
-    const [prompts,setPrompts]=useState<Prompts[]>([])
+    const [prompts, setPrompts] = useState<string[]>([""])
     const [packType,setPackType]=useState("")
     const [images,setImages]=useState(0)
-    const [prompt,setPrompt]=useState("")
     const [packName,setPackName]=useState("")
+    const [trainedModels,setTrainedModels]=useState<Models[]>([])
+    const [inputs,setInputs]=useState<string[]>([""])   
    
+    useEffect(()=>{
+        const fetch=async()=>{
+            const trainedModels:any=await axios.get('')
+            setTrainedModels(trainedModels)
+        }
+    },[])
 useEffect(()=>{
 const fetching=async()=>{
     const genpacks:any=await axios.get('')
@@ -45,19 +52,28 @@ return <div>
 <h2>Total Images in Pack</h2>
 <input type="number" value={images} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setImages(+e.target.value)}} className="border-r-2" />
 <h2>Select Model</h2>
-<input type="text" />
+ <input list="trained-models" id="trained-models" name="trained-models-choice" /> 
+
+<datalist id="trained-models">
+{   trainedModels.map((t,index)=>(
+<option value={t.name} key={index}></option>
+   ))}
+</datalist>
 <div className="flex justify-between">
     <h2>Prompts</h2>
-<button onClick={()=>{}} className="border-r-2">+ Add Prompt</button>
+<button onClick={()=>{
+    
+   setInputs([...inputs,""])
+    
+}} className="border-r-2">+ Add Prompt</button>
 {
-    prompts.map((p,index)=>(
-        <div key={index}>
-            
-        </div>
-    ))
+  inputs.map((i:any)=>(<input type="text" placeholder="Type your prompt" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
+    setPrompts([...prompts,e.target.value])
+  }} />))  
 }
+
 </div>
-<input type="text" />
+
 <span className="p-2 ">
     <h3>Pack Summary</h3>
     <div className="flex-col">
@@ -84,9 +100,10 @@ return <div>
     Create Pack
 </button>
 </div>
-</div>
+</div>,document.body
  
-)}
+)
+}
 
     <h3>Create and manage themed image collections with custom prompts</h3>
 <h2 className="flex">Generating 
