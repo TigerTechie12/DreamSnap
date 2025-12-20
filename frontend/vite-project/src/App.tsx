@@ -1,14 +1,33 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
 
+import './App.css'
+import { BrowserRouter,Route,Routes } from 'react-router-dom'
+import { Dashboard } from './pages/dashboard'
+import { ForgotPassword } from './pages/forgotpassword'
+import { Gallery } from './pages/gallery'
+import { GenerateImages } from './pages/generate'
+import { Homepage } from './pages/homepage'
+import { MyModel } from './pages/mymodel'
+import { MyPacks } from './pages/mypacks'
+import { Auth } from './pages/signin'
+import { TrainModel } from './pages/trainmodel'
 function App() {
-  const [count, setCount] = useState(0)
+
 
   return (
     <>
-      
+      <BrowserRouter>
+      <Routes>
+<Route path='/' element={<Homepage></Homepage>}></Route>
+<Route path='/dashboard' element={<Dashboard></Dashboard>}></Route>
+<Route path='/auth' element={<Auth></Auth>}></Route>
+<Route path='/forgot' element={<ForgotPassword></ForgotPassword>}></Route>
+<Route path='/gallery' element={<Gallery></Gallery>}> </Route>
+<Route path='/mymodels'element={<MyModel></MyModel>}></Route>
+<Route path='/packs' element={<MyPacks></MyPacks>}></Route>
+<Route path='/models' element={<TrainModel></TrainModel>}></Route>
+<Route path='/generate' element={<GenerateImages></GenerateImages>}></Route>
+      </Routes>
+      </BrowserRouter>
     </>
   )
 }

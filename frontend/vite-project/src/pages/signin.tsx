@@ -1,7 +1,7 @@
 import { CameraIcon } from '@heroicons/react/24/solid'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-export function Signin() {
+export function Auth() {
  const [signin,setSignin]=useState(true)
 const navigate=useNavigate()
 
