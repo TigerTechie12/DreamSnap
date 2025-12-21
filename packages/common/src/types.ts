@@ -11,7 +11,7 @@ eye_color:z.enum(["Brown","Blue","Hazel","Gray"]),
 bald:z.boolean(),
 images:z.array(z.string()),
 userId:z.string(),
-imageUrl:z.string()
+imageUrl:z.array(z.string())
 
 })
 export const GenerateImage=z.object({

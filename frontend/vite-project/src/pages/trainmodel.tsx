@@ -1,6 +1,6 @@
 import React from "react";
 import axios from "axios";
-import { useState,useEffect } from "react";
+import { useState,useEffect,useCallback } from "react";
 export function TrainModel(){
 const [name,setName]=useState("")
 const [age,setAge]=useState(0)
@@ -8,6 +8,78 @@ const [gender,setGender]=useState("")
 const [ethinicity,setEthinicity]=useState("")
 const [eyeColor,setEyeColor]=useState("")
 const [bald,setBald]=useState("")
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+const [isDragging,setIsDragging]=useState(false)
+
+const handleDragOver= useCallback((e:React.DragEvent)=>{e.preventDefault()
+    setIsDragging(true)
+},[])
+const handleDragLeave=useCallback((e:React.DragEvent)=>{
+    e.preventDefault()
+    setIsDragging(false)
+},[])
+const handleDrop=useCallback((e:React.DragEvent)=>{
+      e.preventDefault()
+    setIsDragging(false)
+
+    const files = Array.from(e.dataTransfer.files).filter(file =>
+      file.type.startsWith('image/')
+    )
+
+    if (files.length > 0) {
+      handleFiles(files) 
+    }
+},[])
+const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files)
+      handleFiles(files)
+    }
+  }
+
+  
+  const handleFiles = (files: File[]) => {
+    const newFiles = [...uploadedFiles, ...files].slice(0, 20)
+    setUploadedFiles(newFiles)
+  }
+
+  
+  const uploadToS3 = async () => {
+    if (uploadedFiles.length < 10) {
+      alert('Please upload at least 10 photos')
+      return
+    }
+
+    setUploading(true)
+    const urls: string[] = []
+
+    try {
+      for (const file of uploadedFiles) {
+    
+        const { data } = await axios.post(`${API_BASE_URL}/api/get-upload-url`, {
+          fileName: file.name,
+          fileType: file.type,
+        })
+
+    
+        await axios.put(data.uploadURL, file, {
+          headers: { 'Content-Type': file.type },
+        })
+
+        urls.push(data.publicURL)
+      }
+
+      setUploadedUrls(urls)
+      setUploading(false)
+    } catch (error) {
+      console.error('Upload failed:', error)
+      alert('Upload failed. Please try again.')
+      setUploading(false)
+    }
+  }
+
     return <div>
         <h1>Train Your AI Model</h1>
         <h3>Upload 10-20 high-quality photos of yourself to create a personalized AI model</h3>

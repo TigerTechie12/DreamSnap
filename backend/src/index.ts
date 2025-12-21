@@ -101,7 +101,7 @@ return res.status(400).json({message:"Invalid input"})
 
 const { request_id } = await fal.queue.submit("fal-ai/flux-lora-fast-training", {
   input: {
-    images_data_url: parsedResult.data.imageUrl,
+    images_data_url: parsedResult.data.imageUrl as any
     
   },
   webhookUrl: "https://optional.webhook.url/for/results",
