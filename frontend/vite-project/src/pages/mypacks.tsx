@@ -6,16 +6,24 @@ export function MyPacks(){
 id:string
 modelId:string
 packType:string
-status:string
+status:'PENDING' | 'COMPLETED' | 'FAILED'
 totalImages:number
 createdAt:string
 updateAt:string
-
+progress?:number
+images?: PackImage[]
+}
+interface PackImage{
+    id:string
+    imageUrl:string[]
+    prompt:string
 }
 interface Models{
     name:string
 }
-    const [packs,setPacks]=useState<Packs[]>([])
+const [generatingPacks, setGeneratingPacks] = useState<Packs[]>([])
+  const [completedPacks, setCompletedPacks] = useState<Packs[]>([])
+  const [loading, setLoading] = useState(true)
     const [prompts, setPrompts] = useState<string[]>([""])
     const [packType,setPackType]=useState("")
     const [images,setImages]=useState(0)
@@ -33,10 +41,20 @@ interface Models{
 useEffect(()=>{
 const fetching=async()=>{
     const genpacks:any=await axios.get('')
-    setPacks(genpacks)
+    const packs=genpacks.data.packs
+const generating=packs.filter((p:Packs)=>p.status==='PENDING')
+const completed=packs.filter((p:Packs)=>p.status==='COMPLETED')
+setGeneratingPacks(generating)
+setCompletedPacks(completed)
 } 
 },[])   
-
+ if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-white text-xl">Loading packs...</div>
+      </div>
+    );
+  }
 
 return <div>
    <div className="flex"><h1>Photo Packs</h1> <button onClick={()=>{setShowModal(true)}} className="bg-blue-500"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-indigo-500">
@@ -125,9 +143,107 @@ onClick={()=>{
     <span className="sr-only">Loading...</span>
 </div>
  </h2>
-{packs.map((p)=>(p.status ==='PENDING' ? <div className="border-y-sky-600 rounded-2xl">{p.id} {p.modelId} {p.packType} {p.totalImages} {p.createdAt} {p.updateAt}</div> : null))}
-<h2>Completed Packs</h2>
-{packs.map((p)=>(p.status ==='COMPLETED' ? <div className="border-blue-200 rounded-2xl flex"> <div className="border-y-sky-600 rounded-2xl">{p.id} {p.modelId} {p.packType} {p.totalImages} {p.createdAt} {p.updateAt}</div>
+<div className="p-8">
+    {generatingPacks.length>0 && (
+        <div className="mb-12">
+          <div className="flex items-center mb-6">
+            <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mr-3" />
+            <h2 className="text-2xl font-bold text-white">Generating</h2>
+          </div>
+
+          <div className="grid grid-cols-2 gap-6">
+            {generatingPacks.map((pack) => (
+              <div key={pack.id} className="bg-gray-900 rounded-xl p-6 border border-gray-800">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-white">{pack.packType}</h3>
+                  <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+
+                <p className="text-gray-400 mb-2">
+                  Generating... {pack.progress || 60}%
+                </p>
+
+                
+                <div className="w-full bg-gray-800 rounded-full h-2 mb-4">
+                  <div
+                    className="bg-blue-500 h-2 rounded-full transition-all"
+                    style={{ width: `${pack.progress || 60}%` }}
+                  />
+                </div>
+
+                <p className="text-gray-500 text-sm">
+                  {Math.floor(((pack.progress || 60) / 100) * pack.totalImages)} of{' '}
+                  {pack.totalImages} images completed
+                </p>
+
+               
+                <div className="flex gap-2 mt-4">
+                  {pack.images?.slice(0, 5).map((img, idx) => (
+                    <img
+                      key={idx}
+                      src={img.imageUrl[0]}
+                      alt=""
+                      className="w-16 h-16 object-cover rounded"
+                    />
+                  ))}
+                  {pack.totalImages > 5 && (
+                    <div className="w-16 h-16 bg-gray-800 rounded flex items-center justify-center text-gray-400">
+                      +{pack.totalImages - 5}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      
+      <div>
+        <div className="flex items-center mb-6">
+          <svg className="w-6 h-6 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
+          </svg>
+          <h2 className="text-2xl font-bold text-white">Completed Packs</h2>
+        </div>
+
+        {completedPacks.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-gray-400 text-xl">No completed packs yet</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-6">
+            {completedPacks.map((pack) => (
+              <div
+                key={pack.id}
+                className="bg-gray-900 rounded-xl overflow-hidden hover:bg-gray-800 transition cursor-pointer"
+                onClick={() => (window.location.href = `/pack/${pack.id}`)}
+              >
+                <div className="grid grid-cols-4 gap-1">
+                  {pack.images?.slice(0, 4).map((img, idx) => (
+                    <img
+                      key={idx}
+                      src={img.imageUrl[0]}
+                      alt=""
+                      className="w-full h-48 object-cover"
+                    />
+                  ))}
+                </div>
+                <div className="p-4">
+                  <h3 className="text-xl font-bold text-white">{pack.packType}</h3>
+                  <p className="text-gray-400 text-sm">
+                    {pack.totalImages} images • {new Date(pack.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  
+
+
 <button className="bg-blue-600" onClick={()=>{
     setUpdateShowModal(true)
     useEffect(()=>{
@@ -179,7 +295,6 @@ onClick={()=>{
       useEffect(()=>{
         const del=async()=>{axios.delete('')}
     },[]) 
-}}>Delete</button></div> : null))}
-<div></div>
-</div>
-}
+}}>Delete
+</button>
+</div>} 
