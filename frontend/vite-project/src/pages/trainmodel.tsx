@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "axios";
 import { useState,useEffect,useCallback } from "react";
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 export function TrainModel(){
 const [name,setName]=useState("")
 const [age,setAge]=useState(0)
