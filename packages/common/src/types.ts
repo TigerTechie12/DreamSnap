@@ -14,11 +14,13 @@ userId:z.string(),
 imageUrl:z.array(z.string())
 
 })
+export type TrainModel=z.infer<typeof TrainModel>
 export const GenerateImage=z.object({
     prompt:z.string(),
     userId:z.string(),
     modelId:z.string()
 })
+export type GenerateImage=z.infer<typeof GenerateImage>
 export const GenerateImagesFromPack=z.object({
     modelId:z.string(),
     packType:z.string(),
@@ -26,3 +28,4 @@ export const GenerateImagesFromPack=z.object({
     totalImages:z.number(),
     prompts:z.array(z.string())
 })
+export type GenerateImagesFromPack=z.infer<typeof GenerateImagesFromPack>
