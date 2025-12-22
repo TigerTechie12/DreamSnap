@@ -4,47 +4,45 @@ AI Image Generation Platform
 
 🌌 What is DreamSnap?
 
-DreamSnap is an AI-powered image generation platform that transforms text prompts into stunning visuals.
-Users can generate images, organize them into packs, and fully manage their creations — all within a secure, scalable, and modern full-stack application.
+DreamSnap is a full-stack AI image generation platform where users can train their own AI models and generate images or curated image packs using custom prompts.
 
-Built with performance, extensibility, and developer experience in mind.
+Powered by fal.ai, DreamSnap allows creators to go beyond generic image generation by fine-tuning models on their own datasets and using them to produce consistent, high-quality visuals.
 
 ✨ Key Features
+🧠 AI & Model Training (fal.ai)
 
-🧠 Prompt-based AI Image Generation
+Train custom AI image models using fal.ai
 
-🖼️ Image Packs
+Generate images using trained or default models
 
-Group generated images into collections
+Model-specific prompt generation
 
-✏️ CRUD Operations
+Reuse trained models across multiple image packs
 
-Create, update, and delete images & packs
+🖼️ Image & Pack Management
 
-🔐 Authentication & Authorization
+Generate AI images from text prompts
 
-Powered by Clerk
+Organize images into packs
 
-☁️ Cloud Image Storage
+Full CRUD support for images and packs
 
-Secure, scalable uploads using AWS S3
+🔐 Platform Features
 
-🧩 User-Scoped Data
+Secure authentication via Clerk
 
-Each user accesses only their own content
+User-scoped access control
 
-⚡ Type-Safe Backend
+Cloud-based image storage with AWS S3
 
-Prisma + TypeScript for reliability
+Type-safe backend with Prisma & TypeScript
 
 🧠 Tech Stack
 Frontend
 
 React
 
-REST API integration
-
-Component-driven UI
+REST-based API integration
 
 Backend
 
@@ -58,6 +56,14 @@ PostgreSQL
 
 Prisma ORM
 
+AI & Model Training
+
+fal.ai
+
+Custom model training
+
+Image generation inference
+
 Authentication
 
 Clerk
@@ -69,7 +75,7 @@ AWS S3
 🏗️ System Architecture
 Client (React)
    |
-   | REST API
+   | REST APIs
    ↓
 Server (Express + TypeScript)
    |
@@ -77,7 +83,8 @@ Server (Express + TypeScript)
    ↓
 PostgreSQL
 
-Images → AWS S3
+AI Training & Inference → fal.ai
+Image Storage → AWS S3
 Auth → Clerk
 
 🚀 Getting Started
@@ -90,6 +97,8 @@ PostgreSQL
 AWS S3 bucket
 
 Clerk account
+
+fal.ai API key
 
 1️⃣ Clone the Repository
 git clone https://github.com/your-username/dreamsnap.git
@@ -110,12 +119,14 @@ npm install
 
 3️⃣ Environment Variables
 
-Create a .env file inside the backend directory:
+Create a .env file in the backend directory:
 
 DATABASE_URL=postgresql://user:password@localhost:5432/dreamsnap
 
 CLERK_SECRET_KEY=your_clerk_secret
 CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+
+FAL_API_KEY=your_fal_api_key
 
 AWS_ACCESS_KEY_ID=your_aws_access_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret_key
@@ -126,7 +137,7 @@ AWS_S3_BUCKET_NAME=your_bucket_name
 npx prisma migrate dev
 npx prisma generate
 
-5️⃣ Run the App
+5️⃣ Run the Application
 
 Backend
 
@@ -138,43 +149,45 @@ Frontend
 npm start
 
 📡 API Overview
-🔐 Auth
-
-Authentication handled via Clerk middleware
-
+🧠 Models (fal.ai)
+Method	Endpoint	Description
+POST	/models/train	Train a new custom model
+GET	/models	List user-trained models
+DELETE	/models/:id	Delete a trained model
 🖼️ Images
 Method	Endpoint	Description
-POST	/images	Generate & save a new image
-GET	/images	Get all user images
+POST	/images	Generate image using selected model
+GET	/images	Fetch user images
 PUT	/images/:id	Update image metadata
 DELETE	/images/:id	Delete image
 📦 Packs
 Method	Endpoint	Description
-POST	/packs	Create a new image pack
-GET	/packs	Get all packs
-PUT	/packs/:id	Update a pack
-DELETE	/packs/:id	Delete a pack
-🔮 Future Roadmap
+POST	/packs	Create image pack
+POST	/packs/:id/generate	Generate images inside a pack
+GET	/packs	Fetch all packs
+PUT	/packs/:id	Update pack
+DELETE	/packs/:id	Delete pack
+🔮 Roadmap
 
-🧾 Prompt history & regeneration
+🧬 Model versioning & retraining
 
-🌍 Public packs & sharing
+📊 Training progress tracking
 
-💳 Credit-based usage system
+🌍 Public & shared models
 
-🖌️ Image editing & upscaling
+💳 Credit-based pricing per training & inference
 
-⚡ Streaming generation status
+🖌️ Image editing & variations
 
-🧠 Model switching (SD / DALL·E / Custom)
+⚡ Real-time generation updates
 
 🤝 Contributing
 
 Contributions are welcome!
 
-Fork the repository
+Fork the repo
 
-Create a feature branch
+Create a new branch
 
 Commit your changes
 
@@ -182,8 +195,8 @@ Open a pull request 🚀
 
 📄 License
 
-Licensed under the MIT License.
+This project is licensed under the MIT License.
 
 💡 Vision
 
-DreamSnap aims to be a creative AI playground — blending powerful AI image generation with robust backend engineering and delightful UX.
+DreamSnap is built to empower creators with custom-trained AI models, not just generic image generation — blending creativity, control, and scalable engineering into one platform.
