@@ -8,7 +8,8 @@ import { GenerateImages } from './pages/generate'
 import { Homepage } from './pages/homepage'
 import { MyModel } from './pages/mymodel'
 import { MyPacks } from './pages/mypacks'
-import { Auth } from './pages/signin'
+import { SignInPage } from './pages/signin'
+import { SignUpPage } from './pages/signup'
 import { TrainModel } from './pages/trainmodel'
 function App() {
 
@@ -19,7 +20,8 @@ function App() {
       <Routes>
 <Route path='/' element={<Homepage></Homepage>}></Route>
 <Route path='/dashboard' element={<Dashboard></Dashboard>}></Route>
-<Route path='/auth' element={<Auth></Auth>}></Route>
+<Route path='/signin' element={<SignInPage></SignInPage>}></Route>
+<Route path='/signup' element={<SignUpPage></SignUpPage>}></Route>
 <Route path='/forgot' element={<ForgotPassword></ForgotPassword>}></Route>
 <Route path='/gallery' element={<Gallery></Gallery>}> </Route>
 <Route path='/mymodels'element={<MyModel></MyModel>}></Route>

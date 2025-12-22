@@ -21,7 +21,32 @@ app.get('/protected', requireAuth(), async (req, res) => {
   
   const user = await clerkClient.users.getUser(userId)
 
-  return res.json({ user })
+try {
+    
+    let user = await prismaClient.user.findUnique({
+        where:{ clerkId: userId }})
+    
+   
+    if (!user) {
+      const clerkUser = await clerkClient.users.getUser(userId)
+      
+      user = await prismaClient.user.create({
+    data:{
+        clerkId: userId,
+        email: clerkUser.emailAddresses[0]?.emailAddress || '',
+        firstName: clerkUser.firstName!,
+        lastName: clerkUser.lastName!
+    }    
+      })
+    }
+    
+    return res.json({ user })
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to fetch user' })
+  }
+
+
+  
 })
 
 const s3 = new AWS.S3({
@@ -331,7 +356,7 @@ if(!result.images_data_url){
 
 })
 app.get('/packs/bulk',async(req,res)=>{
-const userId=req.userId
+  const { userId }: any = getAuth(req)
 const packs=await prismaClient.packs.findMany({
     where:{userId:userId},
     select:{
@@ -362,7 +387,7 @@ res.status(200).json({pack:pack})
 })
 app.get('/images/bulk',async(req,res)=>{
 
-const userId=req.userId
+  const { userId }: any = getAuth(req)
 const images=await prismaClient.outputImages.findMany({
     where:{userId:userId},
     select:{imageUrl:true,
@@ -492,8 +517,8 @@ app.delete('/packimage/:id',async(req,res)=>{
     })
     return res.status(200).json({message:"Pack Image Deleted!"})
 })
-app.get('/models/bulk',async(req,res)=>{
-    const userId=req.userId
+app.get('/models/bulk',requireAuth(),async(req,res)=>{
+    const { userId }: any = getAuth(req)
 const dbData=await prismaClient.model.findMany({
 where:{userId:userId},
 select:{name:true,

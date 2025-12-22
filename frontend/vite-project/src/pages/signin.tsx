@@ -1,7 +1,13 @@
 import { CameraIcon } from '@heroicons/react/24/solid'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-export function Auth() {
+import { SignIn } from "@clerk/clerk-react"
+export  function SignInPage() {
+  return <SignIn routing="path" path="/sign-in" />
+}
+
+
+/*export function Auth() {
  const [signin,setSignin]=useState(true)
 const navigate=useNavigate()
 
@@ -38,4 +44,4 @@ const navigate=useNavigate()
     </div>
         </div>
     )
-}
+}*/
