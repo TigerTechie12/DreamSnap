@@ -1,6 +1,7 @@
 import React from 'react'
 import { useState,useEffect } from 'react'
 import axios from 'axios'
+import { useAuth } from "@clerk/clerk-react"
 import { useNavigate } from 'react-router-dom'
 interface Photo{
 id:string
@@ -12,13 +13,16 @@ imageUrl:string
 status:string
 }
 export function Gallery(){
+    const { getToken } = useAuth()
     const [photos,setPhotos]=useState<Photo[]>([])
  const [loading, setLoading] = useState(true)
     const navigate=useNavigate()
   useEffect(()=>{
    try{
    const fetchPhotos=async()=>{
-       const ph:any= await axios.get('')
+       const ph:any= await axios.get('',{
+      headers:{'Authorization':`Bearer ${getToken}`}
+    })
     setPhotos(ph)
     }
    fetchPhotos()}
@@ -66,7 +70,9 @@ p.status==='COMPLETED' ? <div key={p.id}   onClick={() => window.open(p.imageUrl
 
 
 </div><button className='bg-red-600' onClick={()=>{
-  useEffect(()=>{const del=async()=>{await axios.delete('')}},[]) 
+  useEffect(()=>{const del=async()=>{await axios.delete('',{
+      headers:{'Authorization':`Bearer ${getToken}`}
+    })}},[]) 
 }}>Delete</button> 
 </div> : null
 ))}

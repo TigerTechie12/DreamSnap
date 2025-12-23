@@ -1,6 +1,8 @@
 import { useState,useEffect } from "react"
 import axios from "axios"
+import { useAuth } from "@clerk/clerk-react"
 export function GenerateImages(){
+     const { getToken } = useAuth()
     const [prompt,setPrompt]=useState("")
     const [modelId,setModelId]=useState("")
     return <div>
@@ -21,7 +23,9 @@ export function GenerateImages(){
             <button onClick={()=>{
                 useEffect(()=>{
                     const dbUpdate=async()=>{
-                        await axios.post('',{modelId:modelId,prompt:{prompt}})
+                        await axios.post('',{modelId:modelId,prompt:{prompt}},{
+      headers:{'Authorization':`Bearer ${getToken}`}
+    })
                    console.log(dbUpdate)
                     }
                 },[])

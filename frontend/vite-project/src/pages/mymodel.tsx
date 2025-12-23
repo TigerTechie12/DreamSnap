@@ -1,7 +1,9 @@
 import React from "react";
 import { useState,useEffect } from "react";
 import axios from "axios";
+import { useAuth } from "@clerk/clerk-react"
 export function MyModel(){
+     const { getToken } = useAuth()
     interface Model{
           id: string
   name: string
@@ -18,7 +20,9 @@ export function MyModel(){
 
     const [models,setModels]=useState<Model[]>([])
     useEffect(()=>{
-      const userModels=async()=>{const data:any= await axios.get('')
+      const userModels=async()=>{const data:any= await axios.get('',{
+      headers:{'Authorization':`Bearer ${getToken}`}
+    })
         setModels(data)
       }
       

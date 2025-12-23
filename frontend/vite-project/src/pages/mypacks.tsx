@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import { createPortal } from "react-dom"
+import { useAuth } from "@clerk/clerk-react"
 export function MyPacks(){
+     const { getToken } = useAuth()
     interface Packs{
 id:string
 modelId:string
@@ -34,13 +36,17 @@ const [generatingPacks, setGeneratingPacks] = useState<Packs[]>([])
    const [updateShowModal,setUpdateShowModal]=useState(false)
     useEffect(()=>{
         const fetch=async()=>{
-            const trainedModels:any=await axios.get('')
+            const trainedModels:any=await axios.get('',{
+      headers:{'Authorization':`Bearer ${getToken}`}
+    })
             setTrainedModels(trainedModels)
         }
     },[])
 useEffect(()=>{
 const fetching=async()=>{
-    const genpacks:any=await axios.get('')
+    const genpacks:any=await axios.get('',{
+      headers:{'Authorization':`Bearer ${getToken}`}
+    })
     const packs=genpacks.data.packs
 const generating=packs.filter((p:Packs)=>p.status==='PENDING')
 const completed=packs.filter((p:Packs)=>p.status==='COMPLETED')
@@ -122,6 +128,8 @@ onClick={()=>{
         images:{images},
         packType:{packType},
         packName:{packName}
+    },{
+      headers:{'Authorization':`Bearer ${getToken}`}
     })}},[])
 }}
 >
@@ -253,7 +261,9 @@ onClick={()=>{
             images:{images},
             prompts:{prompts}
 
-        })}
+        },{
+      headers:{'Authorization':`Bearer ${getToken}`}
+    })}
     },[])
 }}>+ Add Images</button>
 {updateShowModal && createPortal(
@@ -293,7 +303,9 @@ onClick={()=>{
 }
 <button className="bg-red-500" onClick={()=>{
       useEffect(()=>{
-        const del=async()=>{axios.delete('')}
+        const del=async()=>{axios.delete('',{
+      headers:{'Authorization':`Bearer ${getToken}`}
+    })}
     },[]) 
 }}>Delete
 </button>

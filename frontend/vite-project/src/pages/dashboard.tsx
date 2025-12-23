@@ -2,8 +2,10 @@ import {Navbar} from "../components/navbar"
 import {Sidebar} from "../components/sidebar"
 import {useState,useEffect} from "react"
 import axios from "axios"
+
 import { useNavigate } from "react-router-dom"
 export function Dashboard(){
+   
     const navigate=useNavigate()
       const [name,setName]=useState('')
     const [initials,setInitials]=useState('')
@@ -29,12 +31,16 @@ setName(obtainedName)}
 
     useEffect(()=>{
 const fetchingImages=async()=>{
-    const imagesData:any=await axios.get('')
+    const imagesData:any=await axios.get('',{
+      headers:{'Authorization':`Bearer ${token}`}
+    })
     const number=imagesData.data.numberOfImages
 setImagesCreated(number)}
 
 const fetchingPacks=async ()=>{
-const packsData:any=await axios.get('')
+const packsData:any=await axios.get('',{
+      headers:{'Authorization':`Bearer ${token}`}
+    })
 const number=packsData.data.numberOfPacks
 setPacksGenerated(number)
 }

@@ -1,8 +1,10 @@
 import React from "react";
 import axios from "axios";
 import { useState,useEffect,useCallback } from "react";
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const API_BASE_URL = import.meta.env.VITE_API_URL
+import { useAuth } from "@clerk/clerk-react"
 export function TrainModel(){
+     const { getToken } = useAuth()
 const [name,setName]=useState("")
 const [age,setAge]=useState(0)
 const [gender,setGender]=useState("")
@@ -62,11 +64,13 @@ const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { data } = await axios.post(`${API_BASE_URL}/api/get-upload-url`, {
           fileName: file.name,
           fileType: file.type,
-        })
+        },{
+      headers:{'Authorization':`Bearer ${getToken}`}
+    })
 
     
         await axios.put(data.uploadURL, file, {
-          headers: { 'Content-Type': file.type },
+          headers: { 'Content-Type': file.type, 'Authorization':`Bearer ${getToken}`},
         })
 
         urls.push(data.publicURL)
@@ -159,7 +163,9 @@ const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     </span>
 <button className="bg-blue-500 pt-2 pb-2 pr-4 pl-4" onClick={()=>{useEffect(()=>{
     const trainingModelData=async ()=>{
-        const dbUpdate=await axios.post('',{name:{name},gender:{gender},age:{age},bald:{bald},ethinicity:{ethinicity},eyecolor:{eyeColor}})
+        const dbUpdate=await axios.post('',{name:{name},gender:{gender},age:{age},bald:{bald},ethinicity:{ethinicity},eyecolor:{eyeColor}},{
+      headers:{'Authorization':`Bearer ${getToken}`}
+    })
     console.log(dbUpdate)
     }
 },[])}}>Start Training</button>
