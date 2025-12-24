@@ -124,7 +124,7 @@ return res.status(400).json({message:"Invalid input"})
 
 }
 
-const { request_id } = await fal.queue.submit("fal-ai/flux-lora-fast-training", {
+try{const { request_id } = await fal.queue.submit("fal-ai/flux-lora-fast-training", {
   input: {
     images_data_url: parsedResult.data.imageUrl as any
     
@@ -146,14 +146,20 @@ const dbData=await prismaClient.model.create({
     }
 
 })
-
-
 return res.status(200).json({modelId:dbData.id,msg:"Training started"})
+
+}
+catch(e){return res.json({e,msg:"Something went wrong"})}
+
+
+
+
+
 
 })
 app.post('/ai/webhook',async(req,res)=>{
 const {result}=req.body
-if(!result.images_data_url){
+try{if(!result.images_data_url){
 
     const dbData=await prismaClient.model.update({
     where:{
@@ -166,7 +172,8 @@ status:"FAILED"
 }
 })
 return res.status(200).json({message:"Training failed"})
-}
+}}
+catch(e){return res.json({e,msg:"Something went wrong"})}
  
 })
 
@@ -174,10 +181,11 @@ return res.status(200).json({message:"Training failed"})
 app.post('/ai/generate',async(req,res)=>{
     const generationBody=req.body
     const parsedResult=GenerateImage.safeParse(generationBody)
+    
     if(!parsedResult.success){
         return res.status(400).json({message:"Invalid input"})
     }
-const dbModel=await prismaClient.model.findUnique({
+try{const dbModel=await prismaClient.model.findUnique({
     where:{id:parsedResult.data.modelId},
     select:{status:true,
         trainingImagesUrl:true
@@ -206,12 +214,12 @@ const dbData=await prismaClient.outputImages.create({
             userId:parsedResult.data.userId
     }
 })
-return res.status(200).json({ImageId:dbData.id, message:"Generation started"})
+return res.status(200).json({ImageId:dbData.id, message:"Generation started"})}
+catch(e){return res.json({e,msg:"Something went wrong"})}
 })
 app.post('ai/webhook/generate',async(req,res)=>{
     const {result}=req.body
-
-if(!result.images_data_url){
+try{if(!result.images_data_url){
     const dbData=await prismaClient.outputImages.update({
         where:{id:result.request_id},
         data:{status:"FAILED"}
@@ -225,7 +233,10 @@ return res.status(200).json({message:"Image generation failed"})
         status:"COMPLETED"   
     }
 
-    })
+    })}
+catch(e){
+    return res.json({e,msg:"Something went wrong"})
+}
 
 
 try{ const s3Urls: string[] = []
@@ -268,8 +279,7 @@ app.post('/ai/pack/generate',async(req,res)=>{
   const parsedResult=GenerateImagesFromPack.safeParse(inputs)
 if(!parsedResult.success){
     return res.status(400).json({message:"Invalid input"})
-
-}const dbModel=await prismaClient.model.findUnique({
+}try{const dbModel=await prismaClient.model.findUnique({
     where:{id:parsedResult.data.modelId},
     select:{status:true,
         trainingImagesUrl:true
@@ -299,14 +309,21 @@ const dbPack=await prismaClient.packs.create({
 
     }
 })
-})
+})}
+
+catch(e){
+    return res.json({e,msg:"Something went wrong"})
+}
 
 })
 
 app.post('ai/webhook/pack/generate',async(req,res)=>{
     const {result}=req.body
 
-if(!result.images_data_url){
+
+
+ try {
+   if(!result.images_data_url){
     const dbData=await prismaClient.packImages.update({
         where:{id:result.request_id},
         data:{status:"FAILED"}
@@ -318,9 +335,6 @@ if(!result.images_data_url){
         data:{imageUrl:result.images_data_url,
         status:"COMPLETED"}
     })
-
- try {
-   
     const s3Urls: string[] = []
 
     for (let i = 0; i < result.images.length; i++) {
@@ -357,7 +371,7 @@ if(!result.images_data_url){
 })
 app.get('/packs/bulk',async(req,res)=>{
   const { userId }: any = getAuth(req)
-const packs=await prismaClient.packs.findMany({
+  try{const packs=await prismaClient.packs.findMany({
     where:{userId:userId},
     select:{
         packType:true,
@@ -368,12 +382,15 @@ const packs=await prismaClient.packs.findMany({
     }
 })
 const numberOfPacks=packs.length
-return res.status(200).json({packs:packs, numberOfPacks:numberOfPacks})
+return res.status(200).json({packs:packs, numberOfPacks:numberOfPacks})}
+catch(e){
+     return res.json({e,msg:"Something went wrong"})
+}
 })
 
 app.get('/pack/:id',async(req,res)=>{
 const id=req.params.id
-const pack=await prismaClient.packImages.findUnique({
+try{const pack=await prismaClient.packImages.findUnique({
     where:{id:id},
     select:{
         prompts:true,
@@ -383,12 +400,15 @@ const pack=await prismaClient.packImages.findUnique({
     }
 
 })
-res.status(200).json({pack:pack})
+res.status(200).json({pack:pack})}
+catch(e){
+     return res.json({e,msg:"Something went wrong"})
+}
 })
 app.get('/images/bulk',async(req,res)=>{
 
   const { userId }: any = getAuth(req)
-const images=await prismaClient.outputImages.findMany({
+  try{const images=await prismaClient.outputImages.findMany({
     where:{userId:userId},
     select:{imageUrl:true,
         createdAt:true,
@@ -398,14 +418,17 @@ const images=await prismaClient.outputImages.findMany({
 })
 const numberOfImages=images.length
 
-return res.status(200).json({images:images, numberOfImages:numberOfImages})
+return res.status(200).json({images:images, numberOfImages:numberOfImages})}
 
+catch(e){
+     return res.json({e,msg:"Something went wrong"})
+}
 })
 
 app.get('/images:id',async(req,res)=>{
 
 const id=req.params.id
-const images=await prismaClient.outputImages.findUnique({
+try{const images=await prismaClient.outputImages.findUnique({
     where:{id:id},
     select:{
         prompt:true,
@@ -415,15 +438,21 @@ const images=await prismaClient.outputImages.findUnique({
     }
 
 })
-res.status(200).json({images:images})})
+res.status(200).json({images:images})}
+catch(e){
+     return res.json({e,msg:"Something went wrong"})
+}
+
+})
 app.put('/update/pack:id',async(req,res)=>{
     const id=req.params.id
     const inputs=req.body
     const validatedInputs=GenerateImagesFromPack.safeParse(inputs)
+    
     if(!validatedInputs.success){
         return res.status(400).json({message:"Invalid input"})
     }
-    const packUpdate=await prismaClient.packs.update({
+    try{const packUpdate=await prismaClient.packs.update({
         where:{id:id},
         data:{packType:validatedInputs.data.packType,
         totalImages:validatedInputs.data.totalImages,
@@ -460,7 +489,12 @@ const dbUpdate=await prismaClient.packImages.updateMany({
 
     return res.status(200).json({message:"Pack updated"
     })
-})})
+})}
+catch(e){
+     return res.json({e,msg:"Something went wrong"})
+}
+
+})
 
 app.post('/update/packImages/webhook',async(req,res)=>{
     const {result}=req.body
@@ -498,28 +532,40 @@ if(!result.images_data_url){
 
 app.delete('/image/:id',async(req,res)=>{
     const id=req.params.id
-    const deleteImage=await prismaClient.outputImages.delete({
+  try{ const deleteImage=await prismaClient.outputImages.delete({
         where:{id:id},
     })
-    return res.status(200).json({message:"Image Deleted!"})
+    return res.status(200).json({message:"Image Deleted!"})}
+   catch (error) {
+    console.error('Error finding images:', error)
+    res.status(500).json({ message: "Failed " })
+  }
 })
 app.delete('/pack/:id',async(req,res)=>{
     const id=req.params.id
-    const deletePack=await prismaClient.packs.delete({
+    try{ const deletePack=await prismaClient.packs.delete({
         where:{id:id},
     })
-    return res.status(200).json({message:"Pack Deleted!"})
+    return res.status(200).json({message:"Pack Deleted!"})}
+    catch (error) {
+    console.error('Error deleting pack:', error)
+    res.status(500).json({ message: "Failed " })
+  }
 })
 app.delete('/packimage/:id',async(req,res)=>{
     const id=req.params.id
-    const deletePackImage=await prismaClient.packImages.delete({
+    try{const deletePackImage=await prismaClient.packImages.delete({
         where:{id:id},
     })
-    return res.status(200).json({message:"Pack Image Deleted!"})
+    return res.status(200).json({message:"Pack Image Deleted!"})}
+    catch (error) {
+    console.error('Error deleting pack image:', error)
+    res.status(500).json({ message: "Failed " })
+  }
 })
 app.get('/models/bulk',requireAuth(),async(req,res)=>{
     const { userId }: any = getAuth(req)
-const dbData=await prismaClient.model.findMany({
+    try{const dbData=await prismaClient.model.findMany({
 where:{userId:userId},
 select:{name:true,
     gender:true,
@@ -533,11 +579,15 @@ status:true
 
 }
 })
-return res.json({dbData})
+return res.json({dbData})}
+  catch (error) {
+    console.error('Error fetching models', error)
+    res.status(500).json({ message: "Failed " })
+  }
 })
 app.get('/models:id',async(req,res)=>{
     const id=req.params.id
-const dbData=await prismaClient.model.findUnique({
+    try{const dbData=await prismaClient.model.findUnique({
     where:{id:id},
     select:{
 name:true,
@@ -551,7 +601,11 @@ updatedAt:true,
 status:true
     }
 })
-res.json({dbData})
+res.json({dbData})}
+catch (error) {
+    console.error('Error fetching model', error)
+    res.status(500).json({ message: "Failed " })
+  }
 })
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`)
