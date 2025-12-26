@@ -1,9 +1,10 @@
 import {Navbar} from "../components/navbar"
-import {Sidebar} from "../components/sidebar"
+import {Sidebar,SidebarContent,SidebarProvider} from "../components/ui/sidebar"
 import {useState,useEffect} from "react"
 import axios from "axios"
 
 import { useNavigate } from "react-router-dom"
+import { SidebarTrigger } from "../components/ui/sidebar"
 export function Dashboard(){
    
     const navigate=useNavigate()
@@ -49,8 +50,12 @@ setPacksGenerated(number)
 },[imagesCreated,packsGenerated])
 
     return <div>
-<Navbar></Navbar>
-<Sidebar name={name} initials={initials}></Sidebar>
+
+<SidebarProvider>
+<Sidebar></Sidebar>
+<SidebarContent ></SidebarContent>
+</SidebarProvider>
+
 <h1 className="font-semibold font-white">Welcome back, {name}!</h1>
 <h2>Ready to create some amazing AI photos?</h2>
 <div className="flex">
