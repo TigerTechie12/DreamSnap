@@ -1,35 +1,64 @@
 import { useState,useEffect } from "react"
 import axios from "axios"
 import { useAuth } from "@clerk/clerk-react"
+
+const API_BASE_URL = import.meta.env.VITE_API_URL
 export function GenerateImages(){
-     const { getToken } = useAuth()
+    interface Models{
+        name:string,
+        id:string
+        
+    }
+     const { getToken,userId } = useAuth()
     const [prompt,setPrompt]=useState("")
+    const [models,setModels]=useState<Models[]>([])
     const [modelId,setModelId]=useState("")
-    return <div>
-        <h1>Generate Images</h1>
-        <h4>Create stunning AI photos using your trained models</h4>
+    const [selectedModel,setSelectedModel]=useState("")
+    const [allModels,setAllModels]=useState<Models[]>([])
 
-    <span className="border-white border-r-2">
-<div>Generated Images</div>
+    useEffect(()=>{
+        const fetchModels:any=async()=>{const response=await axios.get('',{ headers:{'Authorization':`Bearer ${getToken}`}})
+    const data=response.data
+const reqD=data.filter((d:any)=>(d.status==='COMPLETED'))
+        const required=reqD.map((e:any)=>(e.name))
+      setAllModels(reqD)
+          setModels(required)
+         
+    }  },[])
+const find:any=allModels.find((m)=>(m.name===selectedModel))
+setModelId(find?.id)
 
-</span>
-<span className="border-white border-r-2">
-    <input type="text" value={modelId} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setModelId(e.target.value)}}  placeholder="model id" />
-</span>
-<span className="border-white border-r-2">
-<input type="text" value={prompt} placeholder="Prompt" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setPrompt(e.target.value)}} className="border-white border-r-2" />
-</span>
+    return <div className="bg-black h-screen">
+       <div></div> 
+        <h1 className="text-white font-bold text-4xl">Generate Images</h1>
+        <h4 className="text-gray-500 text-xl">Create stunning AI photos using your trained models</h4>
 
-            <button onClick={()=>{
+    <div className=" rounded-xl">
+<div className="text-white font-bold text-2xl">Generated Images</div>
+
+</div>
+<div className="border border-white w-fit p-4">
+<div className="text-white font-semibold pt-0 pb-4">Generation Settings</div>
+<div>
+    <input onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setSelectedModel(e.target.value)}} className="border border-gray-500  rounded h-8 text-white" type="text" list='models' id='model-input'    placeholder="Select Models" />
+<datalist id='models'>
+   { models.map((m:any,index:number)=>(<option key={index} value={m.model}></option>))}
+</datalist>
+</div>
+<div className="border border-white rounded mt-3  w-85 h-20 border-r-2">
+<input className="text-white pt-3 "  type="text" value={prompt} placeholder="Prompt" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setPrompt(e.target.value)}} />
+</div>
+
+            <button className='bg-blue-400 pl-32 pt-3 pb-3 pr-32 rounded-xl  mt-4' onClick={()=>{
                 useEffect(()=>{
                     const dbUpdate=async()=>{
-                        await axios.post('',{modelId:modelId,prompt:{prompt}},{
+                        await axios.post('',{name:{selectedModel},prompt:{prompt},userId:{userId},modelId:{modelId}},{
       headers:{'Authorization':`Bearer ${getToken}`}
     })
                    console.log(dbUpdate)
                     }
                 },[])
-            }} className="bg-blue-600">
+            }}>
 <div className="flex">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-indigo-500">
 
@@ -37,6 +66,6 @@ export function GenerateImages(){
 </svg>
     <div>Generate</div>
 </div>
-            </button>
+            </button></div>
     </div>
 }

@@ -18,6 +18,7 @@ export type TrainModel=z.infer<typeof TrainModel>
 export const GenerateImage=z.object({
     prompt:z.string(),
     userId:z.string(),
+    name:z.string(),
     modelId:z.string()
 })
 export type GenerateImage=z.infer<typeof GenerateImage>

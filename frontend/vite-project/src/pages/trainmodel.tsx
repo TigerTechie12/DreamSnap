@@ -164,12 +164,10 @@ const [bald,setBald]=useState("")
     }
   }
 
-    return <div className="bg-black"> 
-    <SidebarProvider>
-<Sidebar></Sidebar>
-<SidebarContent ></SidebarContent>
-</SidebarProvider>
-    <div className="flex flex-col justify-center items-center">
+    return <div className="bg-black min-h-screen"> 
+   
+
+    <div className="flex flex-col mt-0 justify-center items-center">
         <h1 className="font-bold text-white mt-7 ml-5 text-4xl text-center">Train Your AI Model</h1>
         <h3 className="ml-5 mb-5 text-gray-400 text-center">Upload high-quality photos of yourself to create a personalized AI model</h3>
    
@@ -342,6 +340,8 @@ const [bald,setBald]=useState("")
             ? "Starting Training..."
             : "Start Training (~15 min)"}
         </button>
+
     </div>
+     
     </div>
 }

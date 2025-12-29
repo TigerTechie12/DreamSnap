@@ -186,7 +186,7 @@ app.post('/ai/generate',async(req,res)=>{
         return res.status(400).json({message:"Invalid input"})
     }
 try{const dbModel=await prismaClient.model.findUnique({
-    where:{id:parsedResult.data.modelId},
+    where:{id:parsedResult.data.name},
     select:{status:true,
         trainingImagesUrl:true
     }
@@ -575,8 +575,8 @@ ethinicity:true,
 eyecolor:true,
 createdAt:true,
 updatedAt:true,
-status:true
-
+status:true,
+id:true
 }
 })
 return res.json({dbData})}
