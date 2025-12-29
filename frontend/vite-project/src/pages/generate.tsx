@@ -9,13 +9,21 @@ export function GenerateImages(){
         id:string
         
     }
+    interface GeneratedImage{
+      
+        imageUrl:string[]
+        prompt:string
+        createdAt:string
+       
+    }
      const { getToken,userId } = useAuth()
     const [prompt,setPrompt]=useState("")
     const [models,setModels]=useState<Models[]>([])
     const [modelId,setModelId]=useState("")
     const [selectedModel,setSelectedModel]=useState("")
     const [allModels,setAllModels]=useState<Models[]>([])
-
+const [generatedImages,setGeneratedImages]=useState<GeneratedImage[]>([])
+const [imageId,setImageId]=useState("")
     useEffect(()=>{
         const fetchModels:any=async()=>{const response=await axios.get('',{ headers:{'Authorization':`Bearer ${getToken}`}})
     const data=response.data
@@ -25,18 +33,27 @@ const reqD=data.filter((d:any)=>(d.status==='COMPLETED'))
           setModels(required)
          
     }  },[])
+    useEffect(()=>{
 const find:any=allModels.find((m)=>(m.name===selectedModel))
-setModelId(find?.id)
+setModelId(find?.id)},[])
 
-    return <div className="bg-black h-screen">
-       <div></div> 
+    return <div className="bg-black h-screen flex  justify-between">
+        <div className="w-3/4"> <div className="text-white font-bold text-4xl">Generated Images</div>
+        { 
+            generatedImages ? generatedImages.map((i:any)=>(<img  src={i.imageUrl} alt={i.prompt} />)) : null
+        }
+        </div>
+      
+
+<div className="w-1/4">
         <h1 className="text-white font-bold text-4xl">Generate Images</h1>
         <h4 className="text-gray-500 text-xl">Create stunning AI photos using your trained models</h4>
 
-    <div className=" rounded-xl">
-<div className="text-white font-bold text-2xl">Generated Images</div>
+   
 
-</div>
+
+
+
 <div className="border border-white w-fit p-4">
 <div className="text-white font-semibold pt-0 pb-4">Generation Settings</div>
 <div>
@@ -50,15 +67,27 @@ setModelId(find?.id)
 </div>
 
             <button className='bg-blue-400 pl-32 pt-3 pb-3 pr-32 rounded-xl  mt-4' onClick={()=>{
-                useEffect(()=>{
-                    const dbUpdate=async()=>{
-                        await axios.post('',{name:{selectedModel},prompt:{prompt},userId:{userId},modelId:{modelId}},{
+                
+                  try{ const dbUpdate=async()=>{
+                       const response= await axios.post('',{name:{selectedModel},prompt:{prompt},userId:{userId},modelId:{modelId}},{
       headers:{'Authorization':`Bearer ${getToken}`}
     })
                    console.log(dbUpdate)
-                    }
-                },[])
-            }}>
+                setImageId(response.data.id)    
+         if(response.data.id){
+                const fetch=async()=>{
+                    const response=await axios.get(`/${imageId}`,{headers:{'Authorization':`Bearer ${getToken}`}})
+           setGeneratedImages(response.data)      }
+           
+            }   
+            }
+        }
+                catch(e){console.error('Image generation failed:',e)} 
+          
+        
+            }}
+            
+            >
 <div className="flex">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-indigo-500">
 
@@ -66,6 +95,10 @@ setModelId(find?.id)
 </svg>
     <div>Generate</div>
 </div>
-            </button></div>
+            </button>
+            
+            </div>
+    
+ </div>
     </div>
 }
