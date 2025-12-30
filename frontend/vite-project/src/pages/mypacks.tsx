@@ -22,6 +22,15 @@ interface PackImage{
 }
 interface Models{
     name:string
+    gender:string
+age:string
+bald:string
+ethinicity:string
+eyecolor:string
+createdAt:string
+updatedAt:string
+status:string
+id:string     
 }
 const [generatingPacks, setGeneratingPacks] = useState<Packs[]>([])
   const [completedPacks, setCompletedPacks] = useState<Packs[]>([])
@@ -39,8 +48,9 @@ const [generatingPacks, setGeneratingPacks] = useState<Packs[]>([])
             const trainedModels:any=await axios.get('',{
       headers:{'Authorization':`Bearer ${getToken}`}
     })
-            setTrainedModels(trainedModels)
+            setTrainedModels(trainedModels.data.models)
         }
+        fetch()
     },[])
 useEffect(()=>{
 const fetching=async()=>{
@@ -52,14 +62,16 @@ const generating=packs.filter((p:Packs)=>p.status==='PENDING')
 const completed=packs.filter((p:Packs)=>p.status==='COMPLETED')
 setGeneratingPacks(generating)
 setCompletedPacks(completed)
+setLoading(false)
 } 
+fetching()
 },[])   
  if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-white text-xl">Loading packs...</div>
       </div>
-    );
+    )
   }
 
 return <div>

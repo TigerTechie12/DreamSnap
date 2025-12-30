@@ -45,7 +45,8 @@ const packsData:any=await axios.get('',{
 const number=packsData.data.numberOfPacks
 setPacksGenerated(number)
 }
-
+fetchingImages()
+fetchingPacks()
 
 },[imagesCreated,packsGenerated])
 

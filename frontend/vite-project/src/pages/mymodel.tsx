@@ -26,7 +26,7 @@ export function MyModel(){
     })
         setModels(data)
       }
-      
+      userModels()
     },[models])
 const navigate=useNavigate()
 

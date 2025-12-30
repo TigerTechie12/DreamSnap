@@ -38,10 +38,10 @@ export function Gallery(){
       </div>
     )
   }
-return <div>
- <div className='flex'>
- <h1>My Gallery</h1>
-    <button className='bg-blue-500 ml-auto'>+ Generate New Image</button>
+return <div className='bg-black'>
+ <div className='flex flex-row'>
+ <h1 className='text-white font-bold text-4xl'>My Gallery</h1>
+    <button onClick={()=>{navigate('/generate')}} className='bg-blue-500 ml-auto'>+ Generate New Image</button>
 
  </div>
    

@@ -31,7 +31,7 @@ const reqD=data.filter((d:any)=>(d.status==='COMPLETED'))
         const required=reqD.map((e:any)=>(e.name))
       setAllModels(reqD)
           setModels(required)
-         
+      fetchModels()   
     }  },[])
     useEffect(()=>{
 const find:any=allModels.find((m)=>(m.name===selectedModel))
