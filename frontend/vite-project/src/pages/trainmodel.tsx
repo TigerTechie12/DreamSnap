@@ -188,8 +188,8 @@ const [bald,setBald]=useState("")
  <h2 className="text-white text-xl ml-3  font-semibold mt-3" >Gender</h2>
   <input  className="border border-gray-700 rounded-md w-3/4 ml-3 mb-6 text-gray-500 mt-3" placeholder="Select Gender" value={gender} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setGender(e.target.value)}} list="gender" />
 <datalist className="text-white" id="gender">
-    <option value="Male"></option>
-    <option value="Female"></option>
+    <option value="Man"></option>
+    <option value="Woman"></option>
     <option value="Others"></option>
 </datalist>
     </div>
@@ -216,7 +216,7 @@ const [bald,setBald]=useState("")
   <input  className="border border-gray-700 rounded-md w-3/4 ml-3 mb-6 text-gray-500 mt-3" value={eyeColor}  placeholder="Select Eye Color" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setEyeColor(e.target.value)}}   list="eye color" />
 <datalist id="eye color">
     <option value="Brown"></option>
-    <option value="Black"></option>
+    <option value="Blue"></option>
     <option value="Hazel"></option>
     <option value="Gray"></option>
 </datalist>
