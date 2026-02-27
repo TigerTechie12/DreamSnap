@@ -1,108 +1,167 @@
-import { useState,useEffect } from "react"
+import { useState, useEffect } from "react"
 import axios from "axios"
 import { useAuth } from "@clerk/clerk-react"
 import { AppSidebar } from "../components/AppSidebar"
 
 const API_BASE_URL = import.meta.env.VITE_API_URL
-export function GenerateImages(){
-    interface Models{
-        name:string,
-        id:string
-        
-    }
-    interface GeneratedImage{
-      
-        imageUrl:string[]
-        prompt:string
-        createdAt:string
-       
-    }
-     const { getToken,userId } = useAuth()
-    const [prompt,setPrompt]=useState("")
-    const [models,setModels]=useState<Models[]>([])
-    const [modelId,setModelId]=useState("")
-    const [selectedModel,setSelectedModel]=useState("")
-    const [allModels,setAllModels]=useState<Models[]>([])
-const [generatedImages,setGeneratedImages]=useState<GeneratedImage[]>([])
-const [imageId,setImageId]=useState("")
-    useEffect(()=>{
-        const fetchModels:any=async()=>{const response=await axios.get('',{ headers:{'Authorization':`Bearer ${getToken}`}})
-    const data=response.data
-const reqD=data.filter((d:any)=>(d.status==='COMPLETED'))
-        const required=reqD.map((e:any)=>(e.name))
-      setAllModels(reqD)
-          setModels(required)
-      fetchModels()   
-    }  },[])
-    useEffect(()=>{
-const find:any=allModels.find((m)=>(m.name===selectedModel))
-setModelId(find?.id)},[])
 
-    return <div className="flex bg-black min-h-screen">
-<AppSidebar />
-<div className="ml-56 flex-1 flex justify-between">
-        <div className="w-3/4"> <div className="text-white font-bold text-4xl">Generated Images</div>
-        { 
-            generatedImages ? generatedImages.map((i:any)=>(<img  src={i.imageUrl} alt={i.prompt} />)) : null
-        }
-        </div>
-      
+interface Model {
+    name: string
+    id: string
+    status: string
+}
 
-<div className="w-1/4">
-        <h1 className="text-white font-bold text-4xl">Generate Images</h1>
-        <h4 className="text-gray-500 text-xl">Create stunning AI photos using your trained models</h4>
+export function GenerateImages() {
+    const { getToken, userId } = useAuth()
+    const [prompt, setPrompt] = useState("")
+    const [models, setModels] = useState<Model[]>([])
+    const [modelId, setModelId] = useState("")
+    const [generating, setGenerating] = useState(false)
+    const [statusMessage, setStatusMessage] = useState("")
+    const [isSuccess, setIsSuccess] = useState(false)
 
-   
-
-
-
-
-<div className="border border-white w-fit p-4">
-<div className="text-white font-semibold pt-0 pb-4">Generation Settings</div>
-<div>
-    <input onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setSelectedModel(e.target.value)}} className="border border-gray-500  rounded h-8 text-white" type="text" list='models' id='model-input'    placeholder="Select Models" />
-<datalist id='models'>
-   { models.map((m:any,index:number)=>(<option key={index} value={m.model}></option>))}
-</datalist>
-</div>
-<div className="border border-white rounded mt-3  w-85 h-20 border-r-2">
-<input className="text-white pt-3 "  type="text" value={prompt} placeholder="Prompt" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setPrompt(e.target.value)}} />
-</div>
-
-            <button className='bg-blue-400 pl-32 pt-3 pb-3 pr-32 rounded-xl  mt-4' onClick={()=>{
-                
-                  try{ const dbUpdate=async()=>{
-                       const response= await axios.post('',{name:{selectedModel},prompt:{prompt},userId:{userId},modelId:{modelId}},{
-      headers:{'Authorization':`Bearer ${getToken}`}
-    })
-                   console.log(dbUpdate)
-                setImageId(response.data.id)    
-         if(response.data.id){
-                const fetch=async()=>{
-                    const response=await axios.get(`/${imageId}`,{headers:{'Authorization':`Bearer ${getToken}`}})
-           setGeneratedImages(response.data)      }
-           fetch()
-            }   
+    useEffect(() => {
+        const fetchModels = async () => {
+            try {
+                const token = await getToken()
+                const res = await axios.get(`${API_BASE_URL}/models/bulk`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const completed = res.data.dbData.filter((m: Model) => m.status === 'COMPLETED')
+                setModels(completed)
+            } catch (e) {
+                console.error('Failed to fetch models:', e)
             }
         }
-                catch(e){console.error('Image generation failed:',e)} 
-          
-        
-            }}
-            
-            >
-<div className="flex">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-indigo-500">
+        fetchModels()
+    }, [])
 
-  <path fillRule="evenodd" d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813a3.75 3.75 0 002.576-2.576l.813-2.846A.75.75 0 019 4.5zM18 1.5a.75.75 0 01.728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 010 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 01-1.456 0l-.258-1.036a2.625 2.625 0 00-1.91-1.91l-1.036-.258a.75.75 0 010-1.456l1.036-.258a2.625 2.625 0 001.91-1.91l.258-1.036A.75.75 0 0118 1.5zM16.5 15a.75.75 0 01.712.513l.394 1.183c.15.447.5.799.948.948l1.183.394a.75.75 0 010 1.422l-1.183.394c-.447.15-.799.502-.948.948l-.394 1.183a.75.75 0 01-1.422 0l-.394-1.183a1.5 1.5 0 00-.948-.948l-1.183-.394a.75.75 0 010-1.422l1.183-.394c.447-.15.799-.502.948-.948l.394-1.183A.75.75 0 0116.5 15z" clipRule="evenodd" />
-</svg>
-    <div>Generate</div>
-</div>
-            </button>
-            
+    const handleGenerate = async () => {
+        if (!modelId || !prompt.trim()) {
+            alert('Please select a model and enter a prompt')
+            return
+        }
+        try {
+            setGenerating(true)
+            setStatusMessage("")
+            const token = await getToken()
+            const response = await axios.post(`${API_BASE_URL}/ai/generate`, {
+                prompt,
+                userId,
+                name: modelId,
+                modelId
+            }, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            setIsSuccess(true)
+            setStatusMessage(`Generation started! Check your gallery in a few minutes. (ID: ${response.data.ImageId})`)
+        } catch (e: any) {
+            console.error('Image generation failed:', e)
+            setIsSuccess(false)
+            setStatusMessage(e.response?.data?.message || 'Generation failed. Please try again.')
+        } finally {
+            setGenerating(false)
+        }
+    }
+
+    return (
+        <div className="flex bg-black min-h-screen">
+            <AppSidebar />
+            <div className="ml-56 flex-1 p-6">
+                <h1 className="text-white font-bold text-3xl mb-1">Generate Images</h1>
+                <p className="text-gray-400 mb-8">Create stunning AI photos using your trained models</p>
+
+                <div className="flex gap-6">
+
+                    {/* Left: Settings panel */}
+                    <div className="w-80 shrink-0">
+                        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 flex flex-col gap-5">
+                            <h2 className="text-white font-semibold text-lg">Generation Settings</h2>
+
+                            <div>
+                                <label className="text-white text-sm font-medium mb-1.5 block">Select Model</label>
+                                {models.length === 0 ? (
+                                    <div className="bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-gray-500 text-sm">
+                                        No trained models available.{' '}
+                                        <a href="/models" className="text-blue-400 hover:underline">Train one first</a>
+                                    </div>
+                                ) : (
+                                    <select
+                                        value={modelId}
+                                        onChange={(e) => setModelId(e.target.value)}
+                                        className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-white text-sm"
+                                    >
+                                        <option value="">-- Choose a model --</option>
+                                        {models.map(m => (
+                                            <option key={m.id} value={m.id}>{m.name}</option>
+                                        ))}
+                                    </select>
+                                )}
+                            </div>
+
+                            <div>
+                                <label className="text-white text-sm font-medium mb-1.5 block">Prompt</label>
+                                <textarea
+                                    value={prompt}
+                                    onChange={(e) => setPrompt(e.target.value)}
+                                    placeholder="Describe the image you want to generate... e.g. 'a professional headshot in a suit, studio lighting'"
+                                    rows={5}
+                                    className="w-full bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-white text-sm resize-none placeholder-gray-600"
+                                />
+                            </div>
+
+                            <button
+                                onClick={handleGenerate}
+                                disabled={generating || !modelId || !prompt.trim()}
+                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                                    <path fillRule="evenodd" d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813a3.75 3.75 0 002.576-2.576l.813-2.846A.75.75 0 019 4.5z" clipRule="evenodd" />
+                                </svg>
+                                {generating ? 'Generating...' : 'Generate Image'}
+                            </button>
+
+                            {statusMessage && (
+                                <div className={`p-3 rounded-lg text-sm border ${isSuccess
+                                    ? 'bg-green-900/20 text-green-400 border-green-500/30'
+                                    : 'bg-red-900/20 text-red-400 border-red-500/30'
+                                    }`}>
+                                    {statusMessage}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Right: Info / result area */}
+                    <div className="flex-1">
+                        <h2 className="text-white font-semibold text-lg mb-4">How it works</h2>
+                        <div className="flex flex-col gap-3 mb-8">
+                            {[
+                                { step: '1', label: 'Select your trained AI model from the dropdown' },
+                                { step: '2', label: 'Write a detailed prompt describing the image you want' },
+                                { step: '3', label: 'Click Generate - your image will be ready in the Gallery shortly' },
+                            ].map(({ step, label }) => (
+                                <div key={step} className="flex items-start gap-3 bg-gray-900 border border-gray-800 rounded-xl p-4">
+                                    <div className="w-7 h-7 rounded-full bg-blue-600 text-white text-sm font-bold flex items-center justify-center shrink-0">
+                                        {step}
+                                    </div>
+                                    <p className="text-gray-300 text-sm pt-0.5">{label}</p>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+                            <h3 className="text-white font-semibold mb-2">Prompt Tips</h3>
+                            <ul className="text-gray-400 text-sm space-y-1.5 list-disc list-inside">
+                                <li>Be specific about lighting, style, and setting</li>
+                                <li>Include mood descriptors like "cinematic", "dramatic", "soft"</li>
+                                <li>Mention camera angles like "portrait", "close-up", "wide shot"</li>
+                                <li>Add style references like "studio lighting", "golden hour", "bokeh"</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
-    
- </div>
-</div>
-    </div>
+        </div>
+    )
 }

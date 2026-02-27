@@ -142,7 +142,7 @@ const [bald,setBald]=useState("")
           name: name,
           age: age,
           gender: gender,
-          ethinicity: ethinicity,
+          ethnicity: ethinicity,
           eye_color: eyeColor,
           bald: bald === "Yes",
           userId: userId,
