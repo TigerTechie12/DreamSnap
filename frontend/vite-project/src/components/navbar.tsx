@@ -12,6 +12,7 @@ export function Navbar() {
      <div className='text-white font-bold text-xl md:text-3xl'>DreamSnap</div>
    </div>
 
+
    <div>
     <button onClick={()=>{navigate('/signup')}} className='bg-blue-500 text-white text-sm md:text-base px-3 py-2 md:p-3 mr-0 md:mr-6 hover:bg-purple-300 rounded-2xl font-semibold'>Get Started</button>
    </div>

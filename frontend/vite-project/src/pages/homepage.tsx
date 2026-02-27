@@ -1,7 +1,13 @@
 import { Navbar } from "../components/navbar"
 import { useNavigate } from "react-router-dom"
+import { useEffect } from "react"
+import { useAuth } from "@clerk/clerk-react"
 export function Homepage(){
     const navigate=useNavigate()
+    const { isSignedIn } = useAuth()
+    useEffect(() => {
+        if (isSignedIn) navigate("/dashboard")
+    }, [isSignedIn])
     return <div className="bg-black min-h-screen overflow-x-hidden">
 <Navbar></Navbar>
 <div className="text-white text-center mt-12 md:mt-20 font-bold text-3xl md:text-5xl px-4">
