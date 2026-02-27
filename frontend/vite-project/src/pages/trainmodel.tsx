@@ -1,11 +1,11 @@
 import React from "react";
 import axios from "axios";
-import { useState,useEffect,useCallback } from "react";
+import { useState,useCallback } from "react";
 const API_BASE_URL = import.meta.env.VITE_API_URL
 import { useAuth } from "@clerk/clerk-react"
 import { AppSidebar } from "../components/AppSidebar"
 export function TrainModel(){
-     const { getToken } = useAuth()
+     const { getToken, userId } = useAuth()
 const [name,setName]=useState("")
 const [age,setAge]=useState(0)
 const [gender,setGender]=useState("")

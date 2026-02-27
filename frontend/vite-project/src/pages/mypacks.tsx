@@ -110,7 +110,7 @@ return <div className="flex bg-black min-h-screen">
     
 }} className="border-r-2">+ Add Prompt</button>
 {
-  inputs.map((i:any)=>(<input type="text" placeholder="Type your prompt" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
+  inputs.map(()=>(<input type="text" placeholder="Type your prompt" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{
     setPrompts([...prompts,e.target.value])
   }} />))  
 }
