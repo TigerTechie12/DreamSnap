@@ -78,7 +78,7 @@ setModelId(find?.id)},[])
                 const fetch=async()=>{
                     const response=await axios.get(`/${imageId}`,{headers:{'Authorization':`Bearer ${getToken}`}})
            setGeneratedImages(response.data)      }
-           
+           fetch()
             }   
             }
         }

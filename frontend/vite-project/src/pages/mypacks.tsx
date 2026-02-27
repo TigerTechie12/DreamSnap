@@ -65,7 +65,7 @@ setCompletedPacks(completed)
 setLoading(false)
 } 
 fetching()
-},[])   
+},[])            
  if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -142,7 +142,8 @@ onClick={()=>{
         packName:{packName}
     },{
       headers:{'Authorization':`Bearer ${getToken}`}
-    })}},[])
+    })}
+post()},[])
 }}
 >
     Create Pack
@@ -275,7 +276,8 @@ onClick={()=>{
 
         },{
       headers:{'Authorization':`Bearer ${getToken}`}
-    })}
+    })
+update()}
     },[])
 }}>+ Add Images</button>
 {updateShowModal && createPortal(
@@ -317,7 +319,8 @@ onClick={()=>{
       useEffect(()=>{
         const del=async()=>{axios.delete('',{
       headers:{'Authorization':`Bearer ${getToken}`}
-    })}
+    })
+del()}
     },[]) 
 }}>Delete
 </button>

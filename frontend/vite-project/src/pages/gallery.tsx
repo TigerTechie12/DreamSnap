@@ -72,7 +72,8 @@ p.status==='COMPLETED' ? <div key={p.id}   onClick={() => window.open(p.imageUrl
 </div><button className='bg-red-600' onClick={()=>{
   useEffect(()=>{const del=async()=>{await axios.delete('',{
       headers:{'Authorization':`Bearer ${getToken}`}
-    })}},[]) 
+    })}
+  del() },[]) 
 }}>Delete</button> 
 </div> : null
 ))}
