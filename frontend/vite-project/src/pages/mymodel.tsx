@@ -91,7 +91,6 @@ export function MyModel() {
                 ) : (
                     <div className="flex flex-col gap-10">
 
-                        {/* Training */}
                         {trainingModels.length > 0 && (
                             <div>
                                 <div className="flex items-center gap-3 mb-4">
@@ -115,7 +114,6 @@ export function MyModel() {
                             </div>
                         )}
 
-                        {/* Completed */}
                         {completedModels.length > 0 && (
                             <div>
                                 <div className="flex items-center gap-3 mb-4">
@@ -173,7 +171,6 @@ export function MyModel() {
                             </div>
                         )}
 
-                        {/* Failed */}
                         {failedModels.length > 0 && (
                             <div>
                                 <div className="flex items-center gap-3 mb-4">

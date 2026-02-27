@@ -73,7 +73,6 @@ export function GenerateImages() {
 
                 <div className="flex gap-6">
 
-                    {/* Left: Settings panel */}
                     <div className="w-80 shrink-0">
                         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 flex flex-col gap-5">
                             <h2 className="text-white font-semibold text-lg">Generation Settings</h2>
@@ -132,7 +131,6 @@ export function GenerateImages() {
                         </div>
                     </div>
 
-                    {/* Right: Info / result area */}
                     <div className="flex-1">
                         <h2 className="text-white font-semibold text-lg mb-4">How it works</h2>
                         <div className="flex flex-col gap-3 mb-8">

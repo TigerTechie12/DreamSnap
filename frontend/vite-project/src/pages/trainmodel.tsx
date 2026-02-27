@@ -1,6 +1,6 @@
-import React from "react";
-import axios from "axios";
-import { useState,useCallback } from "react";
+import React from "react"
+import axios from "axios"
+import { useState,useCallback } from "react"
 const API_BASE_URL = import.meta.env.VITE_API_URL
 import { useAuth } from "@clerk/clerk-react"
 import { AppSidebar } from "../components/AppSidebar"
@@ -12,7 +12,7 @@ const [gender,setGender]=useState("")
 const [ethinicity,setEthinicity]=useState("")
 const [eyeColor,setEyeColor]=useState("")
 const [bald,setBald]=useState("")
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [s3Urls, setS3Urls] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
   const [training, setTraining] = useState(false)
@@ -58,7 +58,7 @@ const [bald,setBald]=useState("")
  
   const removeFile = (index: number) => {
     const newFiles = uploadedFiles.filter((_, i) => i !== index)
-    setUploadedFiles(newFiles);
+    setUploadedFiles(newFiles)
   };
 
 
@@ -74,7 +74,7 @@ const [bald,setBald]=useState("")
 
     try {
       for (let i = 0; i < uploadedFiles.length; i++) {
-        const file = uploadedFiles[i];
+        const file = uploadedFiles[i]
 
         
         const { data } = await axios.post(
@@ -93,7 +93,7 @@ const [bald,setBald]=useState("")
           headers: { "Content-Type": file.type },
         })
 
-        urls.push(data.publicURL);
+        urls.push(data.publicURL)
 
        
         const progress = Math.round(((i + 1) / uploadedFiles.length) * 100)
@@ -114,12 +114,12 @@ const [bald,setBald]=useState("")
   const startTraining = async () => {
   
     if (!name) {
-      alert("Please enter a model name");
-      return;
+      alert("Please enter a model name")
+      return
     }
     if (uploadedFiles.length < 10) {
       alert("Please upload at least 10 photos")
-      return;
+      return
     }
 
     setTraining(true)
@@ -295,8 +295,8 @@ const [bald,setBald]=useState("")
                     />
                     <button
                       onClick={(e) => {
-                        e.stopPropagation();
-                        removeFile(index);
+                        e.stopPropagation()
+                        removeFile(index)
                       }}
                       className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 
                         flex items-center justify-center opacity-0 group-hover:opacity-100 transition"

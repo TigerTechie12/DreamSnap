@@ -178,7 +178,6 @@ export function MyPacks() {
             </div>
             <h3 className="text-gray-400 mb-6">Create and manage themed image collections with custom prompts</h3>
 
-            {/* Create Pack Modal */}
             {showModal && createPortal(
                 <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
                     <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
@@ -227,7 +226,6 @@ export function MyPacks() {
                 document.body
             )}
 
-            {/* Generating Packs */}
             {generatingPacks.length > 0 && (
                 <div className="mb-12">
                     <div className="flex items-center mb-6">
@@ -252,7 +250,6 @@ export function MyPacks() {
                 </div>
             )}
 
-            {/* Completed Packs */}
             <div>
                 <div className="flex items-center mb-6">
                     <svg className="w-6 h-6 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
@@ -297,7 +294,6 @@ export function MyPacks() {
                 )}
             </div>
 
-            {/* Update Pack Modal */}
             {updateShowModal && createPortal(
                 <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
                     <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-lg">
