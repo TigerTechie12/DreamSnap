@@ -1,6 +1,7 @@
 import { useState,useEffect } from "react"
 import axios from "axios"
 import { useAuth } from "@clerk/clerk-react"
+import { AppSidebar } from "../components/AppSidebar"
 
 const API_BASE_URL = import.meta.env.VITE_API_URL
 export function GenerateImages(){
@@ -37,7 +38,9 @@ const reqD=data.filter((d:any)=>(d.status==='COMPLETED'))
 const find:any=allModels.find((m)=>(m.name===selectedModel))
 setModelId(find?.id)},[])
 
-    return <div className="bg-black h-screen flex  justify-between">
+    return <div className="flex bg-black min-h-screen">
+<AppSidebar />
+<div className="ml-56 flex-1 flex justify-between">
         <div className="w-3/4"> <div className="text-white font-bold text-4xl">Generated Images</div>
         { 
             generatedImages ? generatedImages.map((i:any)=>(<img  src={i.imageUrl} alt={i.prompt} />)) : null
@@ -100,5 +103,6 @@ setModelId(find?.id)},[])
             </div>
     
  </div>
+</div>
     </div>
 }

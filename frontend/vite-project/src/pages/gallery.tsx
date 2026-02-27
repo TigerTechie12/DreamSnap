@@ -1,8 +1,9 @@
-import React from 'react'
+
 import { useState,useEffect } from 'react'
 import axios from 'axios'
 import { useAuth } from "@clerk/clerk-react"
 import { useNavigate } from 'react-router-dom'
+import { AppSidebar } from '../components/AppSidebar'
 interface Photo{
 id:string
 modelId:string
@@ -33,12 +34,17 @@ export function Gallery(){
   },[])
      if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="flex bg-black min-h-screen">
+        <AppSidebar />
+        <div className="ml-56 flex-1 flex items-center justify-center">
+          <div className="text-white text-xl">Loading...</div>
+        </div>
       </div>
     )
   }
-return <div className='bg-black'>
+return <div className='flex bg-black min-h-screen'>
+<AppSidebar />
+<div className='ml-56 flex-1 p-6'>
  <div className='flex flex-row'>
  <h1 className='text-white font-bold text-4xl'>My Gallery</h1>
     <button onClick={()=>{navigate('/generate')}} className='bg-blue-500 ml-auto'>+ Generate New Image</button>
@@ -77,6 +83,7 @@ p.status==='COMPLETED' ? <div key={p.id}   onClick={() => window.open(p.imageUrl
 }}>Delete</button> 
 </div> : null
 ))}
+</div>
 </div>
 </div>
 

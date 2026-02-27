@@ -3,6 +3,7 @@ import { useState,useEffect } from "react";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react"
+import { AppSidebar } from "../components/AppSidebar"
 export function MyModel(){
      const { getToken } = useAuth()
     interface Model{
@@ -30,8 +31,10 @@ export function MyModel(){
     },[models])
 const navigate=useNavigate()
 
-    return <div className="bg-black h-screen">
-        <div className="flex flex-row justify-between"> 
+    return <div className="flex bg-black min-h-screen">
+<AppSidebar />
+<div className="ml-56 flex-1 p-6">
+        <div className="flex flex-row justify-between">
               <h1 className="text-white font-bold ml-5 text-3xl">My Models</h1> 
       <button onClick={()=>{navigate('/models')}} className="bg-blue-600 rounded-xl p-3">+ Train New Model</button>
       </div>
@@ -86,6 +89,7 @@ const navigate=useNavigate()
 
          </div> : null       )) 
     }
+</div>
 </div>
     </div>
 }

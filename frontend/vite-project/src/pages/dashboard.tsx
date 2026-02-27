@@ -1,10 +1,7 @@
-import {Navbar} from "../components/navbar"
-import {Sidebar,SidebarContent,SidebarProvider} from "../components/ui/sidebar"
 import {useState,useEffect} from "react"
 import axios from "axios"
-
 import { useNavigate } from "react-router-dom"
-import { SidebarTrigger } from "../components/ui/sidebar"
+import { AppSidebar } from "../components/AppSidebar"
 export function Dashboard(){
    
     const navigate=useNavigate()
@@ -50,13 +47,9 @@ fetchingPacks()
 
 },[imagesCreated,packsGenerated])
 
-    return <div>
-
-<SidebarProvider>
-<Sidebar></Sidebar>
-<SidebarContent ></SidebarContent>
-</SidebarProvider>
-
+    return <div className="flex bg-black min-h-screen">
+<AppSidebar />
+<div className="ml-56 flex-1 p-6">
 <h1 className="font-semibold font-white">Welcome back, {name}!</h1>
 <h2>Ready to create some amazing AI photos?</h2>
 <div className="flex">
@@ -122,7 +115,6 @@ fetchingPacks()
 {}
      </span>
 </div>
-
- 
+</div>
     </div>
 }

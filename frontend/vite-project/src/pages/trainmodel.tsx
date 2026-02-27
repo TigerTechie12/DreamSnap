@@ -3,7 +3,7 @@ import axios from "axios";
 import { useState,useEffect,useCallback } from "react";
 const API_BASE_URL = import.meta.env.VITE_API_URL
 import { useAuth } from "@clerk/clerk-react"
-import {Sidebar,SidebarContent,SidebarProvider} from "../components/ui/sidebar"
+import { AppSidebar } from "../components/AppSidebar"
 export function TrainModel(){
      const { getToken } = useAuth()
 const [name,setName]=useState("")
@@ -164,7 +164,9 @@ const [bald,setBald]=useState("")
     }
   }
 
-    return <div className="bg-black min-h-screen"> 
+    return <div className="flex bg-black min-h-screen">
+<AppSidebar />
+<div className="ml-56 flex-1">
    
 
     <div className="flex flex-col mt-0 justify-center items-center">
@@ -342,6 +344,6 @@ const [bald,setBald]=useState("")
         </button>
 
     </div>
-     
+</div>
     </div>
 }
