@@ -11,7 +11,7 @@ export function Navbar() {
  <div className='text-white font-bold text-3xl ml-4 mt-3'>DreamSnap</div>
 </div>
    
-   <div> <button onClick={()=>{navigate('/signin')}} className='hover:bg-purple-500 bg-blue-500 p-3 m-2 rounded-2xl'>Sign in</button>
+   <div> 
     <button onClick={()=>{navigate('/signup')}} className='bg-blue-500 p-3 mr-6 hover:bg-purple-300 rounded-2xl'>Get Started</button></div>
    
          </div>
