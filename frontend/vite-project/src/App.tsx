@@ -10,7 +10,7 @@ import { MyPacks } from './pages/mypacks'
 import { SignInPage } from './pages/signin'
 import { SignUpPage } from './pages/signup'
 import { TrainModel } from './pages/trainmodel'
-
+import { ProtectRoutes } from './hooks/protected'
 function App() {
   const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
@@ -26,23 +26,23 @@ function App() {
   }
 
   return (
-    
+    <ClerkProvider publishableKey={clerkPubKey}>
       <BrowserRouter>
         <Routes>
           <Route path='/' element={<Homepage />} />
           <Route path='/signin' element={<SignInPage />} />
           <Route path='/signup' element={<SignUpPage />} />
-<ClerkProvider publishableKey={clerkPubKey}>
+        <Route element={<ProtectRoutes />}>
           <Route path='/dashboard' element={<Dashboard />} />
           
-          <Route path='/gallery' element={<Gallery />} />
+        <Route path='/gallery' element={<Gallery />} />
           <Route path='/mymodels' element={<MyModel />} />
           <Route path='/packs' element={<MyPacks />} />
           <Route path='/models' element={<TrainModel />} />
-          <Route path='/generate' element={<GenerateImages />} /></ClerkProvider>
+          <Route path='/generate' element={<GenerateImages />} /></Route>  
         </Routes>
       </BrowserRouter>
-   
+    </ClerkProvider>
   )
 }
 
