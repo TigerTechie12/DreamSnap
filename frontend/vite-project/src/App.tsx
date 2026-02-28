@@ -26,21 +26,23 @@ function App() {
   }
 
   return (
-    <ClerkProvider publishableKey={clerkPubKey}>
+    
       <BrowserRouter>
         <Routes>
           <Route path='/' element={<Homepage />} />
-          <Route path='/dashboard' element={<Dashboard />} />
           <Route path='/signin' element={<SignInPage />} />
           <Route path='/signup' element={<SignUpPage />} />
+<ClerkProvider publishableKey={clerkPubKey}>
+          <Route path='/dashboard' element={<Dashboard />} />
+          
           <Route path='/gallery' element={<Gallery />} />
           <Route path='/mymodels' element={<MyModel />} />
           <Route path='/packs' element={<MyPacks />} />
           <Route path='/models' element={<TrainModel />} />
-          <Route path='/generate' element={<GenerateImages />} />
+          <Route path='/generate' element={<GenerateImages />} /></ClerkProvider>
         </Routes>
       </BrowserRouter>
-    </ClerkProvider>
+   
   )
 }
 
