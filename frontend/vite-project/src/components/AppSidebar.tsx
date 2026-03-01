@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useClerk } from '@clerk/clerk-react'
 import {
@@ -9,6 +10,8 @@ import {
   SparklesIcon,
   CameraIcon,
   ArrowRightStartOnRectangleIcon,
+  Bars3Icon,
+  XMarkIcon,
 } from '@heroicons/react/24/solid'
 
 const navItems = [
@@ -20,18 +23,28 @@ const navItems = [
   { label: 'Generate', icon: SparklesIcon, path: '/generate' },
 ]
 
-export function AppSidebar() {
+function SidebarContent({ onClose }: { onClose?: () => void }) {
   const navigate = useNavigate()
   const location = useLocation()
   const { signOut } = useClerk()
 
+  const handleNav = (path: string) => {
+    navigate(path)
+    onClose?.()
+  }
+
   return (
-    <div className="fixed top-0 left-0 h-screen w-56 bg-gray-950 border-r border-gray-800 flex flex-col py-6 z-50">
+    <>
       <div className="flex items-center gap-3 px-4 mb-8">
         <div className="p-2 bg-blue-500 rounded-full">
           <CameraIcon className="w-5 h-5 text-white" />
         </div>
         <span className="text-white font-bold text-lg">DreamSnap</span>
+        {onClose && (
+          <button onClick={onClose} className="ml-auto text-gray-400 hover:text-white">
+            <XMarkIcon className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       <nav className="flex flex-col gap-1 flex-1">
@@ -40,7 +53,7 @@ export function AppSidebar() {
           return (
             <button
               key={path}
-              onClick={() => navigate(path)}
+              onClick={() => handleNav(path)}
               className={`flex items-center gap-3 px-4 py-3 mx-2 rounded-lg text-sm font-medium transition-colors text-left w-full
                 ${isActive
                   ? 'bg-blue-600 text-white'
@@ -63,6 +76,44 @@ export function AppSidebar() {
           Sign Out
         </button>
       </div>
-    </div>
+    </>
+  )
+}
+
+export function AppSidebar() {
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  return (
+    <>
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center gap-3 bg-gray-950 border-b border-gray-800 px-4 py-3">
+        <button onClick={() => setMobileOpen(true)} className="text-gray-400 hover:text-white">
+          <Bars3Icon className="w-6 h-6" />
+        </button>
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-blue-500 rounded-full">
+            <CameraIcon className="w-4 h-4 text-white" />
+          </div>
+          <span className="text-white font-bold text-lg">DreamSnap</span>
+        </div>
+      </div>
+
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-50 bg-black/60"
+          onClick={() => setMobileOpen(false)}
+        >
+          <div
+            className="w-64 h-full bg-gray-950 border-r border-gray-800 flex flex-col py-6"
+            onClick={e => e.stopPropagation()}
+          >
+            <SidebarContent onClose={() => setMobileOpen(false)} />
+          </div>
+        </div>
+      )}
+
+      <div className="hidden md:flex fixed top-0 left-0 h-screen w-56 bg-gray-950 border-r border-gray-800 flex-col py-6 z-50">
+        <SidebarContent />
+      </div>
+    </>
   )
 }

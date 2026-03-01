@@ -38,10 +38,10 @@ export function Dashboard() {
 
     return <div className="flex bg-black min-h-screen">
 <AppSidebar />
-<div className="ml-56 flex-1 p-6">
+<div className="md:ml-56 flex-1 p-4 md:p-6 pt-16 md:pt-6">
 <h1 className="font-semibold text-white text-2xl">Welcome back, {name}!</h1>
 <h2 className="text-gray-400 mt-1">Ready to create some amazing AI photos?</h2>
-<div className="flex gap-4 mt-6">
+<div className="flex flex-wrap gap-4 mt-6">
     <span className="border border-gray-700 rounded-xl p-4 flex items-center gap-3 text-white">
         <svg className="w-6 h-6 text-blue-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
   <path fillRule="evenodd" d="M13 10a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H14a1 1 0 0 1-1-1Z" clipRule="evenodd"/>

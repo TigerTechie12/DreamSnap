@@ -46,7 +46,7 @@ export function MyModel() {
         return (
             <div className="flex bg-black min-h-screen">
                 <AppSidebar />
-                <div className="ml-56 flex-1 flex items-center justify-center">
+                <div className="md:ml-56 flex-1 flex items-center justify-center pt-16 md:pt-0">
                     <div className="text-white text-xl">Loading models...</div>
                 </div>
             </div>
@@ -60,7 +60,7 @@ export function MyModel() {
     return (
         <div className="flex bg-black min-h-screen">
             <AppSidebar />
-            <div className="ml-56 flex-1 p-6">
+            <div className="md:ml-56 flex-1 p-4 md:p-6 pt-16 md:pt-6">
                 <div className="flex items-center justify-between mb-2">
                     <h1 className="text-white font-bold text-3xl">My Models</h1>
                     <button
@@ -97,7 +97,7 @@ export function MyModel() {
                                     <div className="w-5 h-5 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
                                     <h2 className="text-xl font-bold text-white">Training</h2>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {trainingModels.map(model => (
                                         <div key={model.id} className="bg-gray-900 border border-gray-800 rounded-xl p-5">
                                             <div className="flex items-center justify-between mb-3">
@@ -122,7 +122,7 @@ export function MyModel() {
                                     </svg>
                                     <h2 className="text-xl font-bold text-white">Ready to Use</h2>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {completedModels.map(model => (
                                         <div key={model.id} className="bg-gray-900 border border-gray-800 rounded-xl p-5">
                                             <div className="flex items-center justify-between mb-4">
@@ -179,7 +179,7 @@ export function MyModel() {
                                     </svg>
                                     <h2 className="text-xl font-bold text-white">Failed</h2>
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {failedModels.map(model => (
                                         <div key={model.id} className="bg-gray-900 border border-red-900/50 rounded-xl p-5">
                                             <div className="flex items-center justify-between mb-2">

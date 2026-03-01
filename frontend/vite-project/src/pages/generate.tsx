@@ -67,13 +67,13 @@ export function GenerateImages() {
     return (
         <div className="flex bg-black min-h-screen">
             <AppSidebar />
-            <div className="ml-56 flex-1 p-6">
+            <div className="md:ml-56 flex-1 p-4 md:p-6 pt-16 md:pt-6">
                 <h1 className="text-white font-bold text-3xl mb-1">Generate Images</h1>
                 <p className="text-gray-400 mb-8">Create stunning AI photos using your trained models</p>
 
-                <div className="flex gap-6">
+                <div className="flex flex-col md:flex-row gap-6">
 
-                    <div className="w-80 shrink-0">
+                    <div className="w-full md:w-80 shrink-0">
                         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 flex flex-col gap-5">
                             <h2 className="text-white font-semibold text-lg">Generation Settings</h2>
 

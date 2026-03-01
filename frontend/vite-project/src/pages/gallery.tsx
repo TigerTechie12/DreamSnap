@@ -57,7 +57,7 @@ export function Gallery() {
         return (
             <div className="flex bg-black min-h-screen">
                 <AppSidebar />
-                <div className="ml-56 flex-1 flex items-center justify-center">
+                <div className="md:ml-56 flex-1 flex items-center justify-center pt-16 md:pt-0">
                     <div className="text-white text-xl">Loading gallery...</div>
                 </div>
             </div>
@@ -67,7 +67,7 @@ export function Gallery() {
     return (
         <div className="flex bg-black min-h-screen">
             <AppSidebar />
-            <div className="ml-56 flex-1 p-6">
+            <div className="md:ml-56 flex-1 p-4 md:p-6 pt-16 md:pt-6">
                 <div className="flex items-center justify-between mb-2">
                     <h1 className="text-white font-bold text-3xl">My Gallery</h1>
                     <button
@@ -96,7 +96,7 @@ export function Gallery() {
                         </button>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {photos.map((photo) => (
                             <div key={photo.id} className="bg-gray-900 rounded-xl overflow-hidden border border-gray-800 group">
                                 <div className="relative">

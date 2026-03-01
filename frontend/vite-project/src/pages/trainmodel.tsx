@@ -166,27 +166,27 @@ const [bald,setBald]=useState("")
 
     return <div className="flex bg-black min-h-screen">
 <AppSidebar />
-<div className="ml-56 flex-1">
+<div className="md:ml-56 flex-1 pt-16 md:pt-0">
    
 
     <div className="flex flex-col mt-0 justify-center items-center">
         <h1 className="font-bold text-white mt-7 ml-5 text-4xl text-center">Train Your AI Model</h1>
         <h3 className="ml-5 mb-5 text-gray-400 text-center">Upload high-quality photos of yourself to create a personalized AI model</h3>
    
-    <div className="border border-gray-700 rounded-lg w-1/2">
+    <div className="border border-gray-700 rounded-lg w-full md:w-1/2">
         <h2 className="text-white text-xl ml-3 font-semibold mt-3">Model Name</h2>
         <h4 className="text-gray-400 ml-3">Give your model a memorable name</h4>
-        <input className="border border-gray-700 rounded-md border-r-2 w-3/4 ml-3 mb-6 text-gray-500 mt-3" value={name} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setName(e.target.value)}} type="text" placeholder="Name" />
+        <input className="border border-gray-700 rounded-md w-full md:w-3/4 ml-3 mb-6 text-gray-500 mt-3" value={name} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setName(e.target.value)}} type="text" placeholder="Name" />
     </div>
-    <div className="border border-gray-700 rounded-lg mt-4 w-1/2">
+    <div className="border border-gray-700 rounded-lg mt-4 w-full md:w-1/2">
         <h2 className="text-white text-xl ml-3  font-semibold mt-3" >Model Age</h2>
         
-        <input className="border border-gray-700 rounded-md w-3/4 ml-3 mb-6 text-gray-500 mt-3"  type="number" value={age} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setAge(Number(e.target.value))}} placeholder="type your age" />
+        <input className="border border-gray-700 rounded-md w-full md:w-3/4 ml-3 mb-6 text-gray-500 mt-3"  type="number" value={age} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setAge(Number(e.target.value))}} placeholder="type your age" />
     </div>
 
- <div className="border border-gray-700 rounded-lg w-1/2  mt-5">
+ <div className="border border-gray-700 rounded-lg w-full md:w-1/2 mt-5">
  <h2 className="text-white text-xl ml-3  font-semibold mt-3" >Gender</h2>
-  <input  className="border border-gray-700 rounded-md w-3/4 ml-3 mb-6 text-gray-500 mt-3" placeholder="Select Gender" value={gender} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setGender(e.target.value)}} list="gender" />
+  <input  className="border border-gray-700 rounded-md w-full md:w-3/4 ml-3 mb-6 text-gray-500 mt-3" placeholder="Select Gender" value={gender} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setGender(e.target.value)}} list="gender" />
 <datalist className="text-white" id="gender">
     <option value="Man"></option>
     <option value="Woman"></option>
@@ -194,9 +194,9 @@ const [bald,setBald]=useState("")
 </datalist>
     </div>
 
- <div className="border border-gray-700 rounded-lg w-1/2 mt-5">
+ <div className="border border-gray-700 rounded-lg w-full md:w-1/2 mt-5">
      <h2 className="text-white text-xl ml-3  font-semibold mt-3" >Ethinicity</h2>
- <input   className="border border-gray-700 rounded-md w-3/4 ml-3 mb-6 text-gray-500 mt-3" placeholder="Select Ethinicity"  list="ethinicity" value={ethinicity} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setEthinicity(e.target.value)}} /> 
+ <input   className="border border-gray-700 rounded-md w-full md:w-3/4 ml-3 mb-6 text-gray-500 mt-3" placeholder="Select Ethinicity"  list="ethinicity" value={ethinicity} onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setEthinicity(e.target.value)}} /> 
 <datalist id="ethinicity">
     <option value="White"></option>
     <option value="Black"></option>
@@ -211,9 +211,9 @@ const [bald,setBald]=useState("")
 
 
  
-<div className="border border-gray-700 rounded-lg  mt-5 w-1/2">
+<div className="border border-gray-700 rounded-lg w-full md:w-1/2 mt-5">
     <h2 className="text-white text-xl ml-3  font-semibold mt-3" >Eye Color</h2>
-  <input  className="border border-gray-700 rounded-md w-3/4 ml-3 mb-6 text-gray-500 mt-3" value={eyeColor}  placeholder="Select Eye Color" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setEyeColor(e.target.value)}}   list="eye color" />
+  <input  className="border border-gray-700 rounded-md w-full md:w-3/4 ml-3 mb-6 text-gray-500 mt-3" value={eyeColor}  placeholder="Select Eye Color" onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setEyeColor(e.target.value)}}   list="eye color" />
 <datalist id="eye color">
     <option value="Brown"></option>
     <option value="Blue"></option>
@@ -222,16 +222,16 @@ const [bald,setBald]=useState("")
 </datalist>
     </div>
 
-<div className="border border-gray-700 rounded-lg w-1/2 mt-5">
+<div className="border border-gray-700 rounded-lg w-full md:w-1/2 mt-5">
      <h2 className="text-white text-xl ml-3  font-semibold mt-3" >Baldness</h2>
-<input className="border border-gray-700 rounded-md w-3/4 ml-3 mb-6 text-gray-500 mt-3"  value={bald} placeholder="Select Baldness"  onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setBald(e.target.value)}} list="Bald" />  
+<input className="border border-gray-700 rounded-md w-full md:w-3/4 ml-3 mb-6 text-gray-500 mt-3"  value={bald} placeholder="Select Baldness"  onChange={(e:React.ChangeEvent<HTMLInputElement>)=>{setBald(e.target.value)}} list="Bald" />  
 <datalist id="Bald">
     <option value="Yes"></option>
     <option value="No"></option>
 
 </datalist>
     </div>
-  <div className="border border-gray-700 rounded-lg w-1/2 mt-5 p-6">
+  <div className="border border-gray-700 rounded-lg w-full md:w-1/2 mt-5 p-6">
           <h2 className="text-white font-bold text-xl text-center">Upload Photos</h2>
           <h4 className="text-gray-400 text-center mb-4">
             {uploadedFiles.length}/20 photos uploaded (minimum 10 required)
@@ -285,7 +285,7 @@ const [bald,setBald]=useState("")
           </div>
  {uploadedFiles.length > 0 && (
             <div className="mt-6">
-              <div className="grid grid-cols-5 gap-3">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                 {uploadedFiles.map((file, index) => (
                   <div key={index} className="relative group">
                     <img

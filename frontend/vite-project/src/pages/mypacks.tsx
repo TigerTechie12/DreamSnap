@@ -157,7 +157,7 @@ export function MyPacks() {
         return (
             <div className="flex bg-black min-h-screen">
                 <AppSidebar />
-                <div className="ml-56 flex-1 flex items-center justify-center">
+                <div className="md:ml-56 flex-1 flex items-center justify-center pt-16 md:pt-0">
                     <div className="text-white text-xl">Loading packs...</div>
                 </div>
             </div>
@@ -166,7 +166,7 @@ export function MyPacks() {
 
     return <div className="flex bg-black min-h-screen">
         <AppSidebar />
-        <div className="ml-56 flex-1 p-6">
+        <div className="md:ml-56 flex-1 p-4 md:p-6 pt-16 md:pt-6">
             <div className="flex items-center justify-between mb-2">
                 <h1 className="text-white font-bold text-3xl">Photo Packs</h1>
                 <button onClick={() => { setShowModal(true) }} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl flex items-center gap-2">
@@ -232,7 +232,7 @@ export function MyPacks() {
                         <div className="w-6 h-6 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mr-3" />
                         <h2 className="text-2xl font-bold text-white">Generating</h2>
                     </div>
-                    <div className="grid grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {generatingPacks.map((pack) => (
                             <div key={pack.id} className="bg-gray-900 rounded-xl p-6 border border-gray-800">
                                 <div className="flex items-center justify-between mb-4">
@@ -267,7 +267,7 @@ export function MyPacks() {
                         {completedPacks.map((pack) => (
                             <div key={pack.id} className="bg-gray-900 rounded-xl overflow-hidden border border-gray-800">
                                 {pack.packImages && pack.packImages.length > 0 && (
-                                    <div className="grid grid-cols-4 gap-1">
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
                                         {pack.packImages.slice(0, 4).map((img, idx) => (
                                             <img key={idx} src={img.imageUrl[0]} alt="" className="w-full h-48 object-cover" />
                                         ))}
