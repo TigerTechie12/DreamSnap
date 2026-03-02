@@ -2,8 +2,8 @@ import express from 'express'
 import { fal } from '@fal-ai/client'
 import 'dotenv/config'
 import { clerkMiddleware,clerkClient, requireAuth, getAuth } from '@clerk/express'
-import { TrainModel,GenerateImage,GenerateImagesFromPack } from 'common'
-import {prismaClient} from "db"
+import { TrainModel,GenerateImage,GenerateImagesFromPack } from 'dreamsnap-common'
+import {prismaClient} from "dreamsnap-db"
 const PORT =process.env.PORT || 8080
 const AWS = require('aws-sdk')
 const cors = require('cors')

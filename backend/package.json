@@ -13,14 +13,16 @@
   "dependencies": {
     "@clerk/express": "^1.7.54",
     "@fal-ai/client": "^1.7.2",
+    "@prisma/client": "^6.19.2",
     "adm-zip": "^0.5.16",
     "aws-sdk": "^2.1693.0",
     "axios": "^1.13.2",
-    "common": "file:C:/Users/Shreyash Srivastava/Documents/DreamSnap/packages/common",
     "cors": "^2.8.5",
-    "db": "file:C:/Users/Shreyash Srivastava/Documents/DreamSnap/packages/db",
     "dotenv": "^17.2.3",
-    "multer": "^2.0.2"
+    "dreamsnap-common": "^1.0.0",
+    "dreamsnap-db": "file:../packages/db/dreamsnap-db-7.0.1.tgz",
+    "multer": "^2.0.2",
+    "prisma": "^6.19.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.5",

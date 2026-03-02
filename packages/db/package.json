@@ -1,1 +1,26 @@
-{"name":"db","module":"index.ts","type":"module","exports":{".":"./index.ts"},"dependencies":{"dotenv":"^17.2.3"},"devDependencies":{"@prisma/client":"^5.22.0","@types/node":"^24.10.1","prisma":"^5.22.0"}}
+{
+  "name": "dreamsnap-db",
+  "version": "7.0.2",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist", "prisma"],
+  "scripts": {
+    "build": "tsc",
+    "generate": "prisma generate"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.0.0",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "prisma": "^6.0.0"
+  }
+}
