@@ -1,6 +1,8 @@
 import express from 'express'
 import { fal } from '@fal-ai/client'
 import 'dotenv/config'
+import { readFileSync } from 'fs'
+import { resolve } from 'path'
 import { clerkMiddleware, clerkClient, requireAuth, getAuth } from '@clerk/express'
 import { TrainModel, GenerateImage, GenerateImagesFromPack } from 'dreamsnap-common'
 import { prismaClient } from 'dreamsnap-db'
@@ -8,13 +10,46 @@ import cors from 'cors'
 import AWS from 'aws-sdk'
 import axios from 'axios'
 
+const swaggerDocument = JSON.parse(readFileSync(resolve('src', 'swagger-output.json'), 'utf-8'))
+
 const PORT = process.env.PORT || 8080
 const app = express()
 
 app.use(express.json())
 app.use(clerkMiddleware())
 app.use(cors())
+app.use('/api-docs/assets', express.static(resolve('node_modules', 'swagger-ui-dist')))
+app.get('/api-docs', (_req, res) => {
+  res.type('html').send(`<!DOCTYPE html>
+<html>
+  <head>
+    <title>DreamSnap API Docs</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="/api-docs/assets/swagger-ui.css">
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="/api-docs/assets/swagger-ui-bundle.js"></script>
+    <script>
+      window.onload = function() {
+        SwaggerUIBundle({
+          url: "/openapi.json",
+          dom_id: '#swagger-ui',
+          deepLinking: true,
+          presets: [SwaggerUIBundle.presets.apis, SwaggerUIBundle.SwaggerUIStandalonePreset],
+          layout: "BaseLayout"
+        })
+      }
+    </script>
+  </body>
+</html>`)
+})
 
+
+app.get('/openapi.json', (req, res) => {
+  res.json(swaggerDocument);
+});
 app.get('/protected', requireAuth(), async (req, res) => {
   const { userId }: any = getAuth(req)
   try {
