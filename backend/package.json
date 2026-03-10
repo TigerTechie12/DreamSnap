@@ -6,9 +6,10 @@
   "scripts": {
     "build": "tsc -b && npx prisma generate --schema=node_modules/dreamsnap-db/prisma/schema.prisma",
     "start": "node dist/index.js",
+    "postinstall": "npx prisma generate --schema=node_modules/dreamsnap-db/prisma/schema.prisma",
     "test": "echo \"Error: no test specified\" && exit 1",
-  "gen-docs": "node swagger.js",
-  "dev": "npm run gen-docs && ts-node-dev src/index.ts"
+    "gen-docs": "node swagger.js",
+    "dev": "npm run gen-docs && ts-node-dev src/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -24,7 +25,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "dreamsnap-common": "^1.0.0",
-    "dreamsnap-db": "file:../packages/db/dreamsnap-db-7.0.1.tgz",
+    "dreamsnap-db": "file:./dreamsnap-db-7.0.1.tgz",
     "multer": "^2.0.2",
     "prisma": "^6.19.2",
     "swagger-jsdoc": "^6.2.8",
