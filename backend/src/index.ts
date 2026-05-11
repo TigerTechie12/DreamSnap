@@ -17,7 +17,10 @@ const app = express()
 
 app.use(express.json())
 app.use(clerkMiddleware())
-app.use(cors())
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  credentials: true
+}))
 app.use('/api-docs/assets', express.static(resolve('node_modules', 'swagger-ui-dist')))
 app.get('/api-docs', (_req, res) => {
   res.type('html').send(`<!DOCTYPE html>
