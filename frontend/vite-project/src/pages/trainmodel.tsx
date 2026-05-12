@@ -159,7 +159,8 @@ const [bald,setBald]=useState("")
     
     } catch (error: any) {
       console.error("Training failed:", error)
-      alert(error.response?.data?.message || "Training failed. Please try again.")
+      const msg = error.response?.data?.message || error.message || "Training failed. Please try again."
+      alert(msg)
     } finally {
       setTraining(false)
     }

@@ -9,6 +9,9 @@ import { prismaClient } from 'dreamsnap-db'
 import cors from 'cors'
 import AWS from 'aws-sdk'
 import axios from 'axios'
+import AdmZip from 'adm-zip'
+
+fal.config({ credentials: process.env.FAL_KEY })
 
 const swaggerDocument = JSON.parse(readFileSync(resolve('src', 'swagger-output.json'), 'utf-8'))
 
@@ -131,15 +134,30 @@ app.post('/ai/training', async (req, res) => {
   const input = req.body
   const parsedResult = TrainModel.safeParse(input)
   if (!parsedResult.success) {
-    return res.status(400).json({ message: 'Invalid input' })
+    console.error('Validation error:', parsedResult.error.issues)
+    return res.status(400).json({ message: 'Invalid input', details: parsedResult.error.issues })
   }
   try {
-    const { request_id } = await fal.queue.submit('fal-ai/flux-lora-fast-training', {
-      input: {
-        images_data_url: parsedResult.data.imageUrl as any
-      },
-      webhookUrl: 'https://optional.webhook.url/for/results',
-    })
+    const imageUrls = parsedResult.data.imageUrl
+    const zip = new AdmZip()
+    for (let i = 0; i < imageUrls.length; i++) {
+      const imgRes = await axios.get(imageUrls[i], { responseType: 'arraybuffer' })
+      const ext = imageUrls[i].split('.').pop()?.split('?')[0] || 'jpg'
+      zip.addFile(`image_${i}.${ext}`, Buffer.from(imgRes.data))
+    }
+    const zipBuffer = zip.toBuffer()
+    const zipKey = `training-zips/${Date.now()}-${parsedResult.data.userId}.zip`
+    await s3.upload({ Bucket: BUCKET_NAME, Key: zipKey, Body: zipBuffer, ContentType: 'application/zip' }).promise()
+    const zipUrl = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${zipKey}`
+
+    const submitOptions: any = {
+      input: { images_data_url: zipUrl }
+    }
+    if (process.env.BACKEND_URL) {
+      submitOptions.webhookUrl = `${process.env.BACKEND_URL}/ai/webhook`
+    }
+
+    const { request_id } = await fal.queue.submit('fal-ai/flux-lora-fast-training', submitOptions)
     const dbData = await prismaClient.model.create({
       data: {
         name: parsedResult.data.name,
@@ -154,8 +172,9 @@ app.post('/ai/training', async (req, res) => {
       }
     })
     return res.status(200).json({ modelId: dbData.id, msg: 'Training started' })
-  } catch (e) {
-    return res.json({ e, msg: 'Something went wrong' })
+  } catch (e: any) {
+    console.error('Training error:', e)
+    return res.status(500).json({ message: e?.message || 'Training failed' })
   }
 })
 

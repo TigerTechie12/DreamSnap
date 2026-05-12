@@ -26,3 +26,5 @@ services:
         sync: false
       - key: S3_BUCKET_NAME
         sync: false
+      - key: BACKEND_URL
+        sync: false
