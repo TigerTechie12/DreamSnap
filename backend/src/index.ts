@@ -53,7 +53,7 @@ app.get('/api-docs', (_req, res) => {
 })
 
 
-app.get('/openapi.json', (req, res) => {
+app.get('/openapi.json', (_req, res) => {
   res.json(swaggerDocument);
 });
 app.get('/protected', requireAuth(), async (req, res) => {
@@ -142,7 +142,8 @@ app.post('/ai/training', async (req, res) => {
     const zip = new AdmZip()
     for (const [i, url] of imageUrls.entries()) {
       const imgRes = await axios.get(url, { responseType: 'arraybuffer' })
-      const ext = url.split('?')[0].split('.').pop() || 'jpg'
+      const cleanUrl = url.indexOf('?') !== -1 ? url.slice(0, url.indexOf('?')) : url
+      const ext = cleanUrl.split('.').pop() || 'jpg'
       zip.addFile(`image_${i}.${ext}`, Buffer.from(imgRes.data as ArrayBuffer))
     }
     const zipBuffer = zip.toBuffer()
