@@ -140,10 +140,10 @@ app.post('/ai/training', async (req, res) => {
   try {
     const imageUrls = parsedResult.data.imageUrl
     const zip = new AdmZip()
-    for (let i = 0; i < imageUrls.length; i++) {
-      const imgRes = await axios.get(imageUrls[i], { responseType: 'arraybuffer' })
-      const ext = imageUrls[i].split('.').pop()?.split('?')[0] || 'jpg'
-      zip.addFile(`image_${i}.${ext}`, Buffer.from(imgRes.data))
+    for (const [i, url] of imageUrls.entries()) {
+      const imgRes = await axios.get(url, { responseType: 'arraybuffer' })
+      const ext = url.split('?')[0].split('.').pop() || 'jpg'
+      zip.addFile(`image_${i}.${ext}`, Buffer.from(imgRes.data as ArrayBuffer))
     }
     const zipBuffer = zip.toBuffer()
     const zipKey = `training-zips/${Date.now()}-${parsedResult.data.userId}.zip`
