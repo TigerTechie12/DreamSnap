@@ -29,17 +29,13 @@ const allowedOrigins = Array.from(new Set([
 
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no Origin header (curl, server-to-server)
     if (!origin || allowedOrigins.includes(origin)) callback(null, true)
     else callback(new Error(`Origin ${origin} not allowed by CORS`))
   },
   credentials: true,
 }
 
-// CORS must run before any other middleware so that preflight (OPTIONS)
-// requests get the proper headers before auth/body parsing kicks in.
 app.use(cors(corsOptions))
-app.options('*', cors(corsOptions))
 
 app.use(express.json())
 app.use(clerkMiddleware())
