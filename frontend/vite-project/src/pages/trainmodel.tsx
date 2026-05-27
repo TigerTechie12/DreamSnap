@@ -104,10 +104,11 @@ const [bald,setBald]=useState("")
       setUploading(false)
       console.log("All files uploaded to S3:", urls)
       return urls
-    } catch (error) {
+    } catch (error: any) {
       console.error("Upload failed:", error)
       setUploading(false)
-      throw error
+      const isNetworkErr = !error.response && error.message === "Network Error"
+      throw new Error(isNetworkErr ? "Failed to upload to S3. Check S3 bucket CORS settings." : error.message)
     }
   };
 

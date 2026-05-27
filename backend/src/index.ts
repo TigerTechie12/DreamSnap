@@ -18,12 +18,31 @@ const swaggerDocument = JSON.parse(readFileSync(resolve('src', 'swagger-output.j
 const PORT = process.env.PORT || 8080
 const app = express()
 
+const defaultOrigins = [
+  'http://localhost:5173',
+  'https://dream-snap-eight.vercel.app',
+]
+const allowedOrigins = Array.from(new Set([
+  ...defaultOrigins,
+  ...(process.env.CORS_ORIGIN || '').split(',').map(o => o.trim()).filter(Boolean),
+]))
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no Origin header (curl, server-to-server)
+    if (!origin || allowedOrigins.includes(origin)) callback(null, true)
+    else callback(new Error(`Origin ${origin} not allowed by CORS`))
+  },
+  credentials: true,
+}
+
+// CORS must run before any other middleware so that preflight (OPTIONS)
+// requests get the proper headers before auth/body parsing kicks in.
+app.use(cors(corsOptions))
+app.options('*', cors(corsOptions))
+
 app.use(express.json())
 app.use(clerkMiddleware())
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
-  credentials: true
-}))
 app.use('/api-docs/assets', express.static(resolve('node_modules', 'swagger-ui-dist')))
 app.get('/api-docs', (_req, res) => {
   res.type('html').send(`<!DOCTYPE html>
