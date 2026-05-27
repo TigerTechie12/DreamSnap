@@ -153,6 +153,20 @@ app.post('/ai/training', async (req, res) => {
     return res.status(400).json({ message: 'Invalid input', details: parsedResult.error.issues })
   }
   try {
+    const clerkId = parsedResult.data.userId
+    let user = await prismaClient.user.findUnique({ where: { clerkId } })
+    if (!user) {
+      const clerkUser = await clerkClient.users.getUser(clerkId)
+      user = await prismaClient.user.create({
+        data: {
+          clerkId,
+          email: clerkUser.emailAddresses[0]?.emailAddress || '',
+          firstName: clerkUser.firstName || '',
+          lastName: clerkUser.lastName || '',
+        }
+      })
+    }
+
     const imageUrls = parsedResult.data.imageUrl
     const zip = new AdmZip()
     for (const [i, url] of imageUrls.entries()) {
@@ -182,7 +196,7 @@ app.post('/ai/training', async (req, res) => {
         ethinicity: parsedResult.data.ethinicity,
         eyecolor: parsedResult.data.eye_color,
         bald: parsedResult.data.bald,
-        userId: parsedResult.data.userId,
+        userId: user.id,
         imageUrl: parsedResult.data.imageUrl,
         jobId: request_id
       }
