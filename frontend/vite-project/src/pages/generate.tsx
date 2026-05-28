@@ -19,6 +19,7 @@ export function GenerateImages() {
     const [generating, setGenerating] = useState(false)
     const [statusMessage, setStatusMessage] = useState("")
     const [isSuccess, setIsSuccess] = useState(false)
+    const [resultImage, setResultImage] = useState("")
 
     useEffect(() => {
         const fetchModels = async () => {
@@ -36,6 +37,27 @@ export function GenerateImages() {
         fetchModels()
     }, [])
 
+    // Poll an image job until the worker fills in its imageUrl (self-hosted mode).
+    const pollForImage = async (imageId: string) => {
+        const token = await getToken()
+        const deadline = Date.now() + 15 * 60 * 1000 // give up after 15 min
+        while (Date.now() < deadline) {
+            await new Promise(r => setTimeout(r, 8000))
+            try {
+                const res = await axios.get(`${API_BASE_URL}/images/${imageId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const url = res.data?.images?.imageUrl?.[0]
+                if (url) {
+                    setResultImage(url)
+                    setStatusMessage('Done! Your image is ready (also saved to your gallery).')
+                    return
+                }
+            } catch { /* keep polling */ }
+        }
+        setStatusMessage('Still rendering. Check your gallery shortly — make sure the worker notebook is running.')
+    }
+
     const handleGenerate = async () => {
         if (!modelId || !prompt.trim()) {
             alert('Please select a model and enter a prompt')
@@ -44,6 +66,7 @@ export function GenerateImages() {
         try {
             setGenerating(true)
             setStatusMessage("")
+            setResultImage("")
             const token = await getToken()
             const response = await axios.post(`${API_BASE_URL}/ai/generate`, {
                 prompt,
@@ -54,7 +77,12 @@ export function GenerateImages() {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             setIsSuccess(true)
-            setStatusMessage(`Generation started! Check your gallery in a few minutes. (ID: ${response.data.ImageId})`)
+            if (response.data.mode === 'self-hosted') {
+                setStatusMessage('Queued! Waiting for the GPU worker to render your image…')
+                pollForImage(response.data.ImageId)
+            } else {
+                setStatusMessage(`Generation started! Check your gallery in a few minutes. (ID: ${response.data.ImageId})`)
+            }
         } catch (e: any) {
             console.error('Image generation failed:', e)
             setIsSuccess(false)
@@ -121,12 +149,19 @@ export function GenerateImages() {
                             </button>
 
                             {statusMessage && (
-                                <div className={`p-3 rounded-lg text-sm border ${isSuccess
+                                <div className={`p-3 rounded-lg text-sm border flex items-center gap-2 ${isSuccess
                                     ? 'bg-green-900/20 text-green-400 border-green-500/30'
                                     : 'bg-red-900/20 text-red-400 border-red-500/30'
                                     }`}>
-                                    {statusMessage}
+                                    {isSuccess && !resultImage && (
+                                        <div className="w-4 h-4 border-2 border-green-400 border-t-transparent rounded-full animate-spin shrink-0" />
+                                    )}
+                                    <span>{statusMessage}</span>
                                 </div>
+                            )}
+
+                            {resultImage && (
+                                <img src={resultImage} alt="Generated result" className="w-full rounded-lg border border-gray-700" />
                             )}
                         </div>
                     </div>

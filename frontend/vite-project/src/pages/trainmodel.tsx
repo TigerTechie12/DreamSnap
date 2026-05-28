@@ -155,7 +155,15 @@ const [bald,setBald]=useState("")
       );
 
       console.log("Training started:", response.data)
-      alert(`Training started! Model ID: ${response.data.modelId}`)
+      if (response.data.mode === "manual") {
+        alert(
+          `Training data prepared!\n\nModel ID: ${response.data.modelId}\n\n` +
+          `Run the free Colab notebook (training/flux_lora_colab.ipynb) with this Model ID ` +
+          `to train your model. It will show as COMPLETED here when done.`
+        )
+      } else {
+        alert(`Training started! Model ID: ${response.data.modelId}`)
+      }
 
     
     } catch (error: any) {

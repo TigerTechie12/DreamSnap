@@ -84,6 +84,13 @@ export function MyPacks() {
         fetchPacks()
     }, [])
 
+    // While any pack is still generating, poll so completed images appear automatically.
+    useEffect(() => {
+        if (generatingPacks.length === 0) return
+        const interval = setInterval(fetchPacks, 10000)
+        return () => clearInterval(interval)
+    }, [generatingPacks.length])
+
     const handleCreatePack = async () => {
         if (!selectedModelId || !packType || images < 1 || prompts.filter(p => p.trim()).length < 1) {
             alert('Please fill in all fields')
@@ -121,7 +128,7 @@ export function MyPacks() {
         try {
             setSubmitting(true)
             const token = await getToken()
-            await axios.put(`${API_BASE_URL}/update/pack${selectedPackId}`, {
+            await axios.put(`${API_BASE_URL}/update/pack/${selectedPackId}`, {
                 modelId: selectedModelId,
                 packType,
                 userId,
@@ -239,9 +246,9 @@ export function MyPacks() {
                                     <h3 className="text-xl font-bold text-white">{pack.packType}</h3>
                                     <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
                                 </div>
-                                <p className="text-gray-400 mb-2">Generating... {pack.progress || 60}%</p>
+                                <p className="text-gray-400 mb-2">Generating... {pack.progress ?? 0}%</p>
                                 <div className="w-full bg-gray-800 rounded-full h-2 mb-4">
-                                    <div className="bg-blue-500 h-2 rounded-full transition-all" style={{ width: `${pack.progress || 60}%` }} />
+                                    <div className="bg-blue-500 h-2 rounded-full transition-all" style={{ width: `${pack.progress ?? 0}%` }} />
                                 </div>
                                 <p className="text-gray-500 text-sm">{pack.totalImages} images total</p>
                             </div>
