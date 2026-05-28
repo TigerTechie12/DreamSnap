@@ -511,10 +511,12 @@ app.delete('/packimage/:id', async (req, res) => {
 })
 
 app.get('/models/bulk', requireAuth(), async (req, res) => {
-  const { userId }: any = getAuth(req)
+  const { userId: clerkId }: any = getAuth(req)
   try {
+    const user = await prismaClient.user.findUnique({ where: { clerkId } })
+    if (!user) return res.json({ dbData: [] })
     const dbData = await prismaClient.model.findMany({
-      where: { userId },
+      where: { userId: user.id },
       select: { name: true, gender: true, age: true, bald: true, ethinicity: true, eyecolor: true, createdAt: true, updatedAt: true, status: true, id: true }
     })
     return res.json({ dbData })
