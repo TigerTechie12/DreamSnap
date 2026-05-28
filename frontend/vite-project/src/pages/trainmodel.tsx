@@ -155,11 +155,10 @@ const [bald,setBald]=useState("")
       );
 
       console.log("Training started:", response.data)
-      if (response.data.mode === "manual") {
+      if (response.data.mode === "queued") {
         alert(
-          `Training data prepared!\n\nModel ID: ${response.data.modelId}\n\n` +
-          `Run the free Colab notebook (training/flux_lora_colab.ipynb) with this Model ID ` +
-          `to train your model. It will show as COMPLETED here when done.`
+          `Training queued!\n\nYour model is in the training queue and will be ` +
+          `processed automatically. It will show as COMPLETED in your Models page when done.`
         )
       } else {
         alert(`Training started! Model ID: ${response.data.modelId}`)

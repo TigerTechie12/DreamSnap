@@ -215,8 +215,8 @@ app.post('/ai/training', async (req, res) => {
       return res.status(200).json({
         modelId: dbData.id,
         zipUrl,
-        mode: 'manual',
-        msg: 'Training data prepared. Train this model for free in the Colab notebook, then it will appear as COMPLETED.',
+        mode: 'queued',
+        msg: 'Training queued. It will be picked up by the GPU worker and show as COMPLETED when done.',
       })
     }
 
@@ -298,6 +298,49 @@ app.post('/ai/training/complete', async (req, res) => {
   } catch (e: any) {
     console.error('Complete training error:', e)
     return res.status(500).json({ message: e?.message || 'Failed to complete training' })
+  }
+})
+
+// --- GPU notebook worker: TRAINING queue ---
+
+// Returns models waiting to be trained (status TRAINING, no LoRA weights yet).
+app.get('/worker/training-jobs', async (req, res) => {
+  if (!workerAuthorized(req, res)) return
+  try {
+    const models = await prismaClient.model.findMany({
+      where: { status: 'TRAINING', trainingImagesUrl: { isEmpty: true } },
+      select: { id: true, name: true, imageUrl: true },
+      take: 5,
+    })
+    const jobs = models.map(m => ({
+      id: m.id,
+      name: m.name,
+      imageUrls: m.imageUrl,
+      triggerWord: `${m.name}`.toLowerCase().replace(/[^a-z0-9]/g, '') || 'subject',
+    }))
+    return res.json({ jobs })
+  } catch (e: any) {
+    console.error('worker training-jobs error:', e)
+    return res.status(500).json({ message: e?.message || 'Failed' })
+  }
+})
+
+// Worker reports a finished training job (or marks it failed).
+app.post('/worker/training/:id/complete', async (req, res) => {
+  if (!workerAuthorized(req, res)) return
+  const { loraUrl, failed } = req.body
+  if (!failed && !loraUrl) {
+    return res.status(400).json({ message: 'loraUrl is required unless failed=true' })
+  }
+  try {
+    await prismaClient.model.update({
+      where: { id: req.params.id },
+      data: failed ? { status: 'FAILED' } : { trainingImagesUrl: [loraUrl], status: 'COMPLETED' },
+    })
+    return res.json({ message: 'ok' })
+  } catch (e: any) {
+    console.error('complete training job error:', e)
+    return res.status(500).json({ message: e?.message || 'Failed' })
   }
 })
 

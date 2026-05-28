@@ -25,22 +25,31 @@ export function MyModel() {
     const [loading, setLoading] = useState(true)
     const navigate = useNavigate()
 
-    useEffect(() => {
-        const fetchModels = async () => {
-            try {
-                const token = await getToken()
-                const res = await axios.get(`${API_BASE_URL}/models/bulk`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                })
-                setModels(res.data.dbData)
-            } catch (e) {
-                console.error('Failed to fetch models:', e)
-            } finally {
-                setLoading(false)
-            }
+    const fetchModels = async () => {
+        try {
+            const token = await getToken()
+            const res = await axios.get(`${API_BASE_URL}/models/bulk`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            setModels(res.data.dbData)
+        } catch (e) {
+            console.error('Failed to fetch models:', e)
+        } finally {
+            setLoading(false)
         }
+    }
+
+    useEffect(() => {
         fetchModels()
     }, [])
+
+    // While a model is still training, poll so it flips to COMPLETED automatically.
+    const hasTraining = models.some(m => m.status === 'TRAINING')
+    useEffect(() => {
+        if (!hasTraining) return
+        const interval = setInterval(fetchModels, 15000)
+        return () => clearInterval(interval)
+    }, [hasTraining])
 
     if (loading) {
         return (
