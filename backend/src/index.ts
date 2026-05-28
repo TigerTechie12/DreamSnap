@@ -203,8 +203,14 @@ app.post('/ai/training', async (req, res) => {
     })
     return res.status(200).json({ modelId: dbData.id, msg: 'Training started' })
   } catch (e: any) {
-    console.error('Training error:', e)
-    return res.status(500).json({ message: e?.message || 'Training failed' })
+    const status = e?.status ?? e?.response?.status
+    const body = e?.body ?? e?.response?.data
+    console.error('Training error:', { message: e?.message, status, body, stack: e?.stack })
+    return res.status(500).json({
+      message: e?.message || 'Training failed',
+      status,
+      detail: typeof body === 'string' ? body : JSON.stringify(body ?? {}),
+    })
   }
 })
 
