@@ -18,6 +18,10 @@ const swaggerDocument = JSON.parse(readFileSync(resolve('src', 'swagger-output.j
 const PORT = process.env.PORT || 8080
 const app = express()
 
+// When TRAINING_MODE=manual (or no FAL_KEY), the app runs fully self-hosted/free:
+// training + generation are queued for a GPU notebook worker instead of Fal.ai.
+const SELF_HOSTED = process.env.TRAINING_MODE === 'manual' || !process.env.FAL_KEY
+
 const defaultOrigins = [
   'http://localhost:5173',
   'https://dream-snap-eight.vercel.app',
@@ -101,6 +105,38 @@ const s3 = new AWS.S3({
 })
 const BUCKET_NAME = process.env.S3_BUCKET_NAME || ''
 
+// The frontend sends Clerk's user id, but our FKs reference User.id. Resolve
+// (and lazily create) the DB user from the Clerk id.
+async function getOrCreateUser(clerkId: string) {
+  let user = await prismaClient.user.findUnique({ where: { clerkId } })
+  if (!user) {
+    const clerkUser = await clerkClient.users.getUser(clerkId)
+    user = await prismaClient.user.create({
+      data: {
+        clerkId,
+        email: clerkUser.emailAddresses[0]?.emailAddress || '',
+        firstName: clerkUser.firstName || '',
+        lastName: clerkUser.lastName || '',
+      }
+    })
+  }
+  return user
+}
+
+// Shared secret gate for the GPU notebook worker endpoints.
+function workerAuthorized(req: express.Request, res: express.Response): boolean {
+  const secret = process.env.WORKER_SECRET
+  if (!secret) {
+    res.status(503).json({ message: 'WORKER_SECRET not configured on the server' })
+    return false
+  }
+  if (req.header('x-worker-secret') !== secret) {
+    res.status(401).json({ message: 'Unauthorized worker' })
+    return false
+  }
+  return true
+}
+
 async function downloadAndUploadToS3(imageUrl: string, folder: string, filename: string) {
   try {
     const response = await axios.get(imageUrl, {
@@ -133,7 +169,7 @@ app.post('/api/get-upload-url', async (req, res) => {
     Bucket: BUCKET_NAME,
     Key: key,
     ContentType: fileType,
-    Expires: 300,
+    Expires: 3600, // 1h — large LoRA .safetensors uploads from the training notebook need headroom
   }
   try {
     const uploadURL = await s3.getSignedUrlPromise('putObject', params)
@@ -153,19 +189,7 @@ app.post('/ai/training', async (req, res) => {
     return res.status(400).json({ message: 'Invalid input', details: parsedResult.error.issues })
   }
   try {
-    const clerkId = parsedResult.data.userId
-    let user = await prismaClient.user.findUnique({ where: { clerkId } })
-    if (!user) {
-      const clerkUser = await clerkClient.users.getUser(clerkId)
-      user = await prismaClient.user.create({
-        data: {
-          clerkId,
-          email: clerkUser.emailAddresses[0]?.emailAddress || '',
-          firstName: clerkUser.firstName || '',
-          lastName: clerkUser.lastName || '',
-        }
-      })
-    }
+    const user = await getOrCreateUser(parsedResult.data.userId)
 
     const imageUrls = parsedResult.data.imageUrl
     const zip = new AdmZip()
@@ -179,6 +203,30 @@ app.post('/ai/training', async (req, res) => {
     const zipKey = `training-zips/${Date.now()}-${parsedResult.data.userId}.zip`
     await s3.upload({ Bucket: BUCKET_NAME, Key: zipKey, Body: zipBuffer, ContentType: 'application/zip' }).promise()
     const zipUrl = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${zipKey}`
+
+    // Manual (free) mode: don't submit to Fal. Just create the model record and
+    // hand back the prepared training-data zip so the user can train it for free
+    // in a Colab/Kaggle notebook, then call /ai/training/complete with the LoRA url.
+    if (SELF_HOSTED) {
+      const dbData = await prismaClient.model.create({
+        data: {
+          name: parsedResult.data.name,
+          age: parsedResult.data.age,
+          gender: parsedResult.data.gender,
+          ethinicity: parsedResult.data.ethinicity,
+          eyecolor: parsedResult.data.eye_color,
+          bald: parsedResult.data.bald,
+          userId: user.id,
+          imageUrl: parsedResult.data.imageUrl,
+        }
+      })
+      return res.status(200).json({
+        modelId: dbData.id,
+        zipUrl,
+        mode: 'manual',
+        msg: 'Training data prepared. Train this model for free in the Colab notebook, then it will appear as COMPLETED.',
+      })
+    }
 
     const submitOptions: any = {
       input: { images_data_url: zipUrl }
@@ -229,6 +277,44 @@ app.post('/ai/webhook', async (req, res) => {
   }
 })
 
+// --- Free / manual training support (Colab/Kaggle notebook) ---
+
+// The notebook fetches the training images for a model from here.
+app.get('/ai/training/:modelId/data', async (req, res) => {
+  try {
+    const model = await prismaClient.model.findUnique({
+      where: { id: req.params.modelId },
+      select: { name: true, imageUrl: true, status: true }
+    })
+    if (!model) return res.status(404).json({ message: 'Model not found' })
+    // A trigger word the notebook can use as the LoRA's caption token.
+    const triggerWord = `${model.name}`.toLowerCase().replace(/[^a-z0-9]/g, '') || 'subject'
+    return res.json({ name: model.name, imageUrls: model.imageUrl, status: model.status, triggerWord })
+  } catch (e: any) {
+    console.error('Fetch training data error:', e)
+    return res.status(500).json({ message: e?.message || 'Failed' })
+  }
+})
+
+// The notebook calls this once it has trained + uploaded the LoRA weights.
+app.post('/ai/training/complete', async (req, res) => {
+  const { modelId, loraUrl } = req.body
+  if (!modelId || !loraUrl) {
+    return res.status(400).json({ message: 'modelId and loraUrl are required' })
+  }
+  try {
+    const model = await prismaClient.model.update({
+      where: { id: modelId },
+      // generation reads trainingImagesUrl as the LoRA path, so store the weights url here.
+      data: { trainingImagesUrl: [loraUrl], status: 'COMPLETED' }
+    })
+    return res.status(200).json({ message: 'Model marked as trained', modelId: model.id })
+  } catch (e: any) {
+    console.error('Complete training error:', e)
+    return res.status(500).json({ message: e?.message || 'Failed to complete training' })
+  }
+})
+
 app.post('/ai/generate', async (req, res) => {
   const generationBody = req.body
   const parsedResult = GenerateImage.safeParse(generationBody)
@@ -243,6 +329,21 @@ app.post('/ai/generate', async (req, res) => {
     if (!dbModel || dbModel.status !== 'COMPLETED') {
       return res.status(400).json({ message: 'Model not found or not trained yet' })
     }
+    const user = await getOrCreateUser(parsedResult.data.userId)
+
+    if (SELF_HOSTED) {
+      // Queue the job (status defaults to PENDING) for the notebook worker to pick up.
+      const dbData = await prismaClient.outputImages.create({
+        data: {
+          prompt: parsedResult.data.prompt,
+          modelId: parsedResult.data.modelId,
+          jobid: '',
+          userId: user.id,
+        }
+      })
+      return res.status(200).json({ ImageId: dbData.id, message: 'Generation queued', mode: 'self-hosted' })
+    }
+
     const path: any = dbModel.trainingImagesUrl
     const { request_id } = await fal.queue.submit('fal-ai/flux-lora', {
       input: {
@@ -256,7 +357,7 @@ app.post('/ai/generate', async (req, res) => {
         prompt: parsedResult.data.prompt,
         modelId: parsedResult.data.modelId,
         jobid: request_id,
-        userId: parsedResult.data.userId
+        userId: user.id,
       }
     })
     return res.status(200).json({ ImageId: dbData.id, message: 'Generation started' })
@@ -314,7 +415,30 @@ app.post('/ai/pack/generate', async (req, res) => {
     if (!dbModel || dbModel.status !== 'COMPLETED') {
       return res.status(400).json({ message: 'Model not found or not trained yet' })
     }
+    const user = await getOrCreateUser(parsedResult.data.userId)
     const prompts = parsedResult.data.prompts
+
+    if (SELF_HOSTED) {
+      // One Pack with a PENDING PackImages row per prompt for the worker to render.
+      const pack = await prismaClient.packs.create({
+        data: {
+          modelId: parsedResult.data.modelId,
+          packType: parsedResult.data.packType,
+          totalImages: parsedResult.data.totalImages,
+          userId: user.id,
+          jobId: '',
+        }
+      })
+      await prismaClient.packImages.createMany({
+        data: prompts.map((p: string) => ({
+          packId: pack.id,
+          prompts: p,
+          falRequestId: '',
+        }))
+      })
+      return res.status(200).json({ packId: pack.id, queued: prompts.length, mode: 'self-hosted' })
+    }
+
     const path: any = dbModel.trainingImagesUrl
     prompts.map(async (p: string) => {
       const { request_id } = await fal.queue.submit('fal-ai/flux-lora', {
@@ -326,11 +450,12 @@ app.post('/ai/pack/generate', async (req, res) => {
           modelId: parsedResult.data.modelId,
           packType: parsedResult.data.packType,
           totalImages: parsedResult.data.totalImages,
-          userId: parsedResult.data.userId,
+          userId: user.id,
           jobId: request_id
         }
       })
     })
+    return res.status(200).json({ message: 'Pack generation started' })
   } catch (e) {
     return res.json({ e, msg: 'Something went wrong' })
   }
@@ -370,12 +495,115 @@ app.post('/ai/webhook/pack/generate', async (req, res) => {
   }
 })
 
-app.get('/packs/bulk', async (req, res) => {
-  const { userId }: any = getAuth(req)
+// --- GPU notebook worker: poll pending jobs, return results ---
+
+// Returns pending generation jobs (single images + pack images), each carrying
+// the LoRA weights url + prompt the worker needs to render it.
+app.get('/worker/jobs', async (req, res) => {
+  if (!workerAuthorized(req, res)) return
   try {
-    const packs = await prismaClient.packs.findMany({
-      where: { userId: userId },
-      select: { packType: true, totalImages: true, createdAt: true, id: true, modelId: true }
+    const loraCache = new Map<string, string | undefined>()
+    const loraFor = async (modelId: string) => {
+      if (!loraCache.has(modelId)) {
+        const m = await prismaClient.model.findUnique({
+          where: { id: modelId }, select: { trainingImagesUrl: true }
+        })
+        loraCache.set(modelId, m?.trainingImagesUrl?.[0])
+      }
+      return loraCache.get(modelId)
+    }
+
+    const jobs: Array<{ type: 'image' | 'packImage'; id: string; prompt: string; loraUrl: string }> = []
+
+    const images = await prismaClient.outputImages.findMany({
+      where: { status: 'PENDING' },
+      select: { id: true, prompt: true, modelId: true },
+      take: 20,
+    })
+    for (const img of images) {
+      const loraUrl = await loraFor(img.modelId)
+      if (loraUrl) jobs.push({ type: 'image', id: img.id, prompt: img.prompt, loraUrl })
+    }
+
+    const packImgs = await prismaClient.packImages.findMany({
+      where: { status: 'PENDING' },
+      select: { id: true, prompts: true, packId: true },
+      take: 20,
+    })
+    for (const pi of packImgs) {
+      const pack = await prismaClient.packs.findUnique({
+        where: { id: pi.packId }, select: { modelId: true }
+      })
+      if (!pack) continue
+      const loraUrl = await loraFor(pack.modelId)
+      if (loraUrl) jobs.push({ type: 'packImage', id: pi.id, prompt: pi.prompts, loraUrl })
+    }
+
+    return res.json({ jobs })
+  } catch (e: any) {
+    console.error('worker jobs error:', e)
+    return res.status(500).json({ message: e?.message || 'Failed' })
+  }
+})
+
+// Worker reports a finished single-image job (or marks it failed).
+app.post('/worker/jobs/image/:id/complete', async (req, res) => {
+  if (!workerAuthorized(req, res)) return
+  const { imageUrls, failed } = req.body
+  try {
+    await prismaClient.outputImages.update({
+      where: { id: req.params.id },
+      data: failed ? { status: 'FAILED' } : { imageUrl: imageUrls, status: 'COMPLETED' },
+    })
+    return res.json({ message: 'ok' })
+  } catch (e: any) {
+    console.error('complete image job error:', e)
+    return res.status(500).json({ message: e?.message || 'Failed' })
+  }
+})
+
+// Worker reports a finished pack-image job (or marks it failed).
+app.post('/worker/jobs/packimage/:id/complete', async (req, res) => {
+  if (!workerAuthorized(req, res)) return
+  const { imageUrls, failed } = req.body
+  try {
+    const updated = await prismaClient.packImages.update({
+      where: { id: req.params.id },
+      data: failed ? { status: 'FAILED' } : { imageUrl: imageUrls, status: 'COMPLETED' },
+    })
+    // When every image in the pack is done, mark the parent pack COMPLETED.
+    const siblings = await prismaClient.packImages.findMany({
+      where: { packId: updated.packId }, select: { status: true }
+    })
+    if (siblings.length > 0 && siblings.every(s => s.status !== 'PENDING')) {
+      await prismaClient.packs.update({
+        where: { id: updated.packId }, data: { status: 'COMPLETED' }
+      })
+    }
+    return res.json({ message: 'ok' })
+  } catch (e: any) {
+    console.error('complete pack image job error:', e)
+    return res.status(500).json({ message: e?.message || 'Failed' })
+  }
+})
+
+app.get('/packs/bulk', async (req, res) => {
+  const { userId: clerkId }: any = getAuth(req)
+  try {
+    const user = await prismaClient.user.findUnique({ where: { clerkId } })
+    if (!user) return res.status(200).json({ packs: [], numberOfPacks: 0 })
+    const rows = await prismaClient.packs.findMany({
+      where: { userId: user.id },
+      select: {
+        packType: true, totalImages: true, createdAt: true, id: true, modelId: true, status: true,
+        packImages: { select: { id: true, imageUrl: true, prompts: true, status: true } }
+      }
+    })
+    // Surface completion progress so the UI's "Generating" bar is meaningful.
+    const packs = rows.map(p => {
+      const count = p.packImages.length || 1
+      const done = p.packImages.filter(pi => pi.status === 'COMPLETED').length
+      return { ...p, progress: Math.round((done / count) * 100) }
     })
     return res.status(200).json({ packs, numberOfPacks: packs.length })
   } catch (e) {
@@ -397,10 +625,12 @@ app.get('/pack/:id', async (req, res) => {
 })
 
 app.get('/images/bulk', async (req, res) => {
-  const { userId }: any = getAuth(req)
+  const { userId: clerkId }: any = getAuth(req)
   try {
+    const user = await prismaClient.user.findUnique({ where: { clerkId } })
+    if (!user) return res.status(200).json({ images: [], numberOfImages: 0 })
     const images = await prismaClient.outputImages.findMany({
-      where: { userId },
+      where: { userId: user.id },
       select: { imageUrl: true, createdAt: true, prompt: true, id: true }
     })
     return res.status(200).json({ images, numberOfImages: images.length })
