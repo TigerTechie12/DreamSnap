@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls frontend/vite-project/.env*)",
+      "Bash(ls backend/.env*)"
+    ]
+  }
+}
