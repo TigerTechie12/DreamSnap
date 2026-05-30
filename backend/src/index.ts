@@ -308,20 +308,23 @@ app.get('/worker/training-jobs', async (req, res) => {
   if (!workerAuthorized(req, res)) return
   try {
     const models = await prismaClient.model.findMany({
-      where: { status: 'TRAINING', trainingImagesUrl: { isEmpty: true } },
-      select: { id: true, name: true, imageUrl: true },
-      take: 5,
+      where: { status: 'TRAINING' },
+      select: { id: true, name: true, imageUrl: true, trainingImagesUrl: true },
+      take: 20,
     })
-    const jobs = models.map(m => ({
-      id: m.id,
-      name: m.name,
-      imageUrls: m.imageUrl,
-      triggerWord: `${m.name}`.toLowerCase().replace(/[^a-z0-9]/g, '') || 'subject',
-    }))
+    const jobs = models
+      .filter(m => !m.trainingImagesUrl || m.trainingImagesUrl.length === 0)
+      .slice(0, 5)
+      .map(m => ({
+        id: m.id,
+        name: m.name,
+        imageUrls: m.imageUrl,
+        triggerWord: `${m.name}`.toLowerCase().replace(/[^a-z0-9]/g, '') || 'subject',
+      }))
     return res.json({ jobs })
   } catch (e: any) {
     console.error('worker training-jobs error:', e)
-    return res.status(500).json({ message: e?.message || 'Failed' })
+    return res.status(500).json({ message: e?.message || 'Failed', stack: e?.stack })
   }
 })
 

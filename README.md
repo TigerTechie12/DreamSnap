@@ -1,202 +1,228 @@
-🎨 DreamSnap
+# DreamSnap
 
-AI Image Generation Platform
+**Personalized AI photo generation** — users upload selfies, the app fine-tunes a
+Flux LoRA on them, then generates new images and themed multi-prompt packs of
+themselves on demand.
 
-🌌 What is DreamSnap?
+DreamSnap runs in two execution modes from the same product code:
 
-DreamSnap is a full-stack AI image generation platform where users can train their own AI models and generate images or curated image packs using custom prompts.
+- **Hosted** — training and inference go to [Fal.ai](https://fal.ai).
+- **Self-hosted (free)** — a single env flag flips the backend to a job-queue
+  model served by GPU notebook workers running on Colab / Kaggle. Same product,
+  $0 cloud bill, operator-run.
 
-Powered by fal.ai, DreamSnap allows creators to go beyond generic image generation by fine-tuning models on their own datasets and using them to produce consistent, high-quality visuals.
+---
 
-✨ Key Features
-🧠 AI & Model Training (fal.ai)
+## Features
 
-Train custom AI image models using fal.ai
+- Personal LoRA fine-tuning on top of `black-forest-labs/FLUX.1-dev`.
+- Single-image generation from text prompts using your trained model.
+- Themed image packs — one parent pack with N prompts, rendered into N images.
+- Browser-direct uploads to S3 via presigned URLs (server never proxies file bytes).
+- Auto-refreshing UI for training / generation / pack progress.
+- Clerk-based authentication and per-user data scoping.
+- OpenAPI/Swagger docs at `/api-docs`.
 
-Generate images using trained or default models
+## Tech stack
 
-Model-specific prompt generation
+| Layer | Tools |
+| --- | --- |
+| Frontend | React 18, TypeScript, Vite, Tailwind v4, Radix UI, react-router, Clerk React, Axios |
+| Backend | Node.js, Express, TypeScript, Clerk Express middleware, Zod (via shared package) |
+| Data | Prisma ORM, PostgreSQL (Neon) |
+| Storage | AWS S3 (presigned PUT) |
+| ML — hosted | Fal.ai (`flux-lora-fast-training`, `flux-lora`) + webhook callbacks |
+| ML — self-hosted | Flux.1-dev + [ai-toolkit](https://github.com/ostris/ai-toolkit) (training) and Hugging Face Diffusers (inference) on Colab/Kaggle GPU notebooks |
+| Infra | Vercel (frontend), Render (backend), Neon (Postgres), Hugging Face Hub |
 
-Reuse trained models across multiple image packs
+## Architecture
 
-🖼️ Image & Pack Management
+```
+┌──────────────┐                ┌──────────────────┐                ┌──────────────┐
+│   Frontend   │   REST + JWT   │     Backend      │   Prisma       │   Postgres   │
+│  React/Vite  │ ─────────────▶ │ Express + TS     │ ─────────────▶ │    (Neon)    │
+└──────────────┘                └──────────────────┘                └──────────────┘
+                                        │
+            presigned PUT               │
+   ┌────────────────────────────────────┼────────────────────────┐
+   │                                    │                        │
+   ▼                                    ▼                        ▼
+┌──────────┐                ┌──────────────────────┐   ┌──────────────────────┐
+│  AWS S3  │                │  HOSTED MODE         │   │  SELF-HOSTED MODE    │
+│ uploads, │                │  Fal.ai queue +      │   │  Postgres job queue  │
+│ LoRAs,   │                │  webhook callbacks   │   │  +                   │
+│ outputs  │                │                      │   │  Colab GPU workers   │
+└──────────┘                └──────────────────────┘   │  (training + gen)    │
+                                                       └──────────────────────┘
+```
 
-Generate AI images from text prompts
+The backend picks a mode at startup:
+`SELF_HOSTED = process.env.TRAINING_MODE === 'manual' || !process.env.FAL_KEY`.
+Both modes produce identical product behavior — only the execution path differs.
 
-Organize images into packs
+## Repo layout
 
-Full CRUD support for images and packs
+```
+.
+├── backend/                      Express + TS API
+│   └── src/index.ts              all routes
+├── frontend/vite-project/        React + Vite + Tailwind app
+├── packages/
+│   ├── common/                   Zod schemas shared by FE + BE (dreamsnap-common)
+│   └── db/                       Prisma schema + client (dreamsnap-db)
+├── training/                     Colab notebooks for the self-hosted GPU workers
+│   ├── flux_train_worker_colab.ipynb
+│   ├── flux_worker_colab.ipynb
+│   ├── flux_lora_colab.ipynb     (optional, manual per-model)
+│   └── README.md
+└── render.yaml                   Render deploy config
+```
 
-🔐 Platform Features
+## Getting started
 
-Secure authentication via Clerk
+### Prerequisites
 
-User-scoped access control
+- Node.js 18+
+- A Postgres database (Neon, local, anything)
+- An AWS S3 bucket
+- A Clerk app (publishable key for FE, secret key for BE)
+- One of: a Fal.ai API key (hosted mode) **or** a Hugging Face token with
+  `FLUX.1-dev` access (self-hosted mode)
 
-Cloud-based image storage with AWS S3
+### 1. Install
 
-Type-safe backend with Prisma & TypeScript
-
-🧠 Tech Stack
-Frontend
-
-React
-
-REST-based API integration
-
-Backend
-
-Node.js
-
-Express.js
-
-TypeScript
-
-PostgreSQL
-
-Prisma ORM
-
-AI & Model Training
-
-fal.ai
-
-Custom model training
-
-Image generation inference
-
-Authentication
-
-Clerk
-
-Storage
-
-AWS S3
-
-🏗️ System Architecture
-Client (React)
-   |
-   | REST APIs
-   ↓
-Server (Express + TypeScript)
-   |
-   | Prisma ORM
-   ↓
-PostgreSQL
-
-AI Training & Inference → fal.ai
-Image Storage → AWS S3
-Auth → Clerk
-
-🚀 Getting Started
-Prerequisites
-
-Node.js (v18+)
-
-PostgreSQL
-
-AWS S3 bucket
-
-Clerk account
-
-fal.ai API key
-
-1️⃣ Clone the Repository
-git clone https://github.com/your-username/dreamsnap.git
+```bash
+git clone <your-repo-url> dreamsnap
 cd dreamsnap
 
-2️⃣ Install Dependencies
+# the db package needs to build first so the others can use it
+cd packages/db && npm install && cd ../..
+cd backend && npm install && cd ..
+cd frontend/vite-project && npm install && cd ../..
+```
 
-Frontend
+### 2. Environment
 
-cd frontend
-npm install
+**`backend/.env`**
 
+```ini
+PORT=8080
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:5173
 
-Backend
+DATABASE_URL=postgresql://user:password@host:5432/dreamsnap
+CLERK_SECRET_KEY=sk_test_...
 
-cd backend
-npm install
+# S3
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_REGION=...
+S3_BUCKET_NAME=...
 
-3️⃣ Environment Variables
+# --- choose one execution mode ---
 
-Create a .env file in the backend directory:
+# Hosted mode (Fal.ai)
+FAL_KEY=...
 
-DATABASE_URL=postgresql://user:password@localhost:5432/dreamsnap
+# Self-hosted mode (Colab worker)
+TRAINING_MODE=manual          # forces queue mode even if FAL_KEY is set
+WORKER_SECRET=<long random>   # shared with the worker notebooks
+BACKEND_URL=https://<your-deploy>.onrender.com  # used in Fal webhook URLs
+```
 
-CLERK_SECRET_KEY=your_clerk_secret
-CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+**`frontend/vite-project/.env`**
 
-FAL_API_KEY=your_fal_api_key
+```ini
+VITE_API_URL=http://localhost:8080
+VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
+```
 
-AWS_ACCESS_KEY_ID=your_aws_access_key
-AWS_SECRET_ACCESS_KEY=your_aws_secret_key
-AWS_REGION=your_region
-AWS_S3_BUCKET_NAME=your_bucket_name
+**`packages/db/.env`** — Prisma reads its own `.env` for migrations.
 
-4️⃣ Database Setup
-npx prisma migrate dev
+```ini
+DATABASE_URL=postgresql://user:password@host:5432/dreamsnap
+```
+
+### 3. Database
+
+```bash
+cd packages/db
+npx prisma migrate deploy
 npx prisma generate
+```
 
-5️⃣ Run the Application
+### 4. Run
 
-Backend
+```bash
+# backend
+cd backend && npm run dev
 
-npm run dev
+# frontend (in another terminal)
+cd frontend/vite-project && npm run dev
+```
 
+Open `http://localhost:5173`, sign in via Clerk, and you're up.
 
-Frontend
+## Self-hosted (free) pipeline
 
-npm start
+If you set `TRAINING_MODE=manual` + `WORKER_SECRET`, training and generation are
+queued in Postgres and served by Colab/Kaggle GPU worker notebooks instead of
+Fal.ai. Users keep using the app exactly the same way — the difference is purely
+operational (you keep two worker notebooks running on free GPUs).
 
-📡 API Overview
-🧠 Models (fal.ai)
-Method	Endpoint	Description
-POST	/models/train	Train a new custom model
-GET	/models	List user-trained models
-DELETE	/models/:id	Delete a trained model
-🖼️ Images
-Method	Endpoint	Description
-POST	/images	Generate image using selected model
-GET	/images	Fetch user images
-PUT	/images/:id	Update image metadata
-DELETE	/images/:id	Delete image
-📦 Packs
-Method	Endpoint	Description
-POST	/packs	Create image pack
-POST	/packs/:id/generate	Generate images inside a pack
-GET	/packs	Fetch all packs
-PUT	/packs/:id	Update pack
-DELETE	/packs/:id	Delete pack
-🔮 Roadmap
+See **[training/README.md](./training/README.md)** for setup.
 
-🧬 Model versioning & retraining
+## API surface (high-level)
 
-📊 Training progress tracking
+| Group | Endpoint(s) | Purpose |
+| --- | --- | --- |
+| Auth | `GET /protected` | Resolve / lazily create the DB user from a Clerk session |
+| Uploads | `POST /api/get-upload-url` | Get a presigned S3 PUT URL for the browser or workers |
+| Training | `POST /ai/training` | Queue a model for training (auto-detects mode) |
+|   | `GET /ai/training/:modelId/data` | Worker: fetch training images for one model |
+|   | `POST /ai/training/complete` | Mark a model trained (LoRA URL in the body) |
+| Generation | `POST /ai/generate` | Single image: queue (self-hosted) or submit to Fal (hosted) |
+|   | `POST /ai/pack/generate` | Themed pack with N prompts |
+| Worker queue (self-hosted) | `GET /worker/training-jobs` | Models awaiting training |
+|   | `POST /worker/training/:id/complete` | Worker reports a finished training job |
+|   | `GET /worker/jobs` | Pending image + pack-image render jobs |
+|   | `POST /worker/jobs/image/:id/complete` | Worker reports a finished single image |
+|   | `POST /worker/jobs/packimage/:id/complete` | Worker reports a finished pack image |
+| Read | `GET /models/bulk`, `GET /models/:id` | List / fetch the current user's models |
+|   | `GET /images/bulk`, `GET /images/:id` | List / fetch generated images |
+|   | `GET /packs/bulk`, `GET /pack/:id` | List / fetch packs (with progress) |
+| Mutate | `PUT /update/pack/:id` | Add more prompts/images to a pack |
+|   | `DELETE /image/:id`, `/pack/:id`, `/packimage/:id` | Delete resources |
+| Docs | `GET /api-docs`, `GET /openapi.json` | Swagger UI + OpenAPI spec |
 
-🌍 Public & shared models
+`/worker/*` endpoints require a `x-worker-secret` header matching `WORKER_SECRET`.
 
-💳 Credit-based pricing per training & inference
+## Deployment
 
-🖌️ Image editing & variations
+- **Frontend** — Vercel from `frontend/vite-project`. Set `VITE_API_URL` to the
+  deployed backend and `VITE_CLERK_PUBLISHABLE_KEY` to your Clerk publishable key.
+- **Backend** — Render, config in [`render.yaml`](./render.yaml). Set all backend
+  env vars in the Render dashboard (they're declared `sync: false`).
+- **Database** — Neon (free tier auto-suspends after idle — fine for low traffic,
+  cold-start adds a few seconds).
+- **GPU workers (self-hosted mode)** — Colab/Kaggle notebooks in `training/`.
+  Keep both running on separate GPU sessions; a single T4 can't hold the training
+  subprocess and the inference pipeline at once.
 
-⚡ Real-time generation updates
+## License & model usage
 
-🤝 Contributing
+- **This repo**: MIT.
+- **FLUX.1-dev** is gated and licensed under the
+  [FLUX.1-dev Non-Commercial License](https://huggingface.co/black-forest-labs/FLUX.1-dev/blob/main/LICENSE.md).
+  Fine for portfolio / personal / research use. **Not allowed for commercial
+  deployment**; switch to `FLUX.1-schnell` (Apache 2.0) or get a commercial Flux
+  license before monetizing.
 
-Contributions are welcome!
+## Roadmap
 
-Fork the repo
-
-Create a new branch
-
-Commit your changes
-
-Open a pull request 🚀
-
-📄 License
-
-This project is licensed under the MIT License.
-
-💡 Vision
-
-DreamSnap is built to empower creators with custom-trained AI models, not just generic image generation — blending creativity, control, and scalable engineering into one platform.
+- Persistent worker on a cheap always-on GPU to remove the "keep the Colab tab
+  open" operational cost.
+- Model versioning + retraining.
+- Public / shared models.
+- Credit-based pricing.
+- Image editing / variations.
